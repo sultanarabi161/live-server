@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmarks and Explorer App</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="https://i.ibb.co/TYrPKmh/1000010998.gif
+">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f5f5;
+            --text-color: #333;
+            --hover-color: #e8f0fe;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .site-name {
+            font-size: 18px;
+        }
+
+        .icon {
+            cursor: pointer;
+        }
+
+        main {
+            padding: 20px;
+            flex: 1;
+        }
+
+        .search-box,
+        .m3u-input-box {
+            max-width: 600px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .search-box input,
+        .m3u-input-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .m3u-input-box {
+            display: none; /* Initial state set to none */
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 10px 0;
+            width: 100%;
+            position: relative;
+            margin-top: auto;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        #explorer-container {
+            width: 95%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+
+        #explorer {
+            height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .folder, .file {
+            padding: 10px;
+            cursor: pointer;
+            display: block;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .folder:hover, .file:hover {
+            background-color: var(--hover-color);
+        }
+
+        .files {
+            padding-left: 20px;
+            display: none;
+            list-style-type: none;
+            margin: 0;
+        }
+
+        .active > .files {
+            display: block;
+        }
+
+        .folder-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #ffd700;
+        }
+
+        .file-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #4caf50;
+        }
+
+        .file img {
+            vertical-align: middle;
+            margin-right: 5px;
+            height: 18px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://i.ibb.co/TYrPKmh/1000010998.gif" alt="Logo" class="logo" style="height: 40px;">
+        <div class="site-name">Bookmarks and Explorer App</div>
+        <div class="icon" onclick="toggleM3UInput()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </div>
+    </header>
+    <main>
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Search bookmarks...">
+        </div>
+        <div class="m3u-input-box">
+            <input type="text" id="bookmark-name" placeholder=" Name">
+            <input type="text" id="bookmark-url" placeholder="Bookmark URL">
+            <input type="text" id="bookmark-logo" placeholder="Logo URL (optional)">
+            <button onclick="addCustomBookmark()">Add Bookmark</button>
+        </div>
+        
+        <div id="explorer-container">
+            <div id="explorer"></div> <!-- Modern Folder Explorer UI -->
+        </div>
+    </main>
+    <footer>
+        <p>© 2024 Bookmarks App. All rights reserved.</p>
+        <button onclick="showClearCachePopup()">Clear Bookmarks</button>
+    </footer>
+
+    <div class="popup" id="clearCachePopup">
+        <div class="popup-content">
+            <h3>Clear Bookmarks</h3>
+            <p>Are you sure you want to clear all bookmarks?</p>
+            <button onclick="clearCache()">Yes</button>
+            <button onclick="hideClearCachePopup()">No</button>
+        </div>
+    </div>
+
+    <script>
+        let customBookmarks = JSON.parse(localStorage.getItem('customBookmarks')) || [];
+
+        function toggleM3UInput() {
+            const m3uInputBox = document.querySelector('.m3u-input-box');
+            m3uInputBox.style.display = m3uInputBox.style.display === 'none' || m3uInputBox.style.display === '' ? 'flex' : 'none';
+        }
+
+        function addCustomBookmark() {
+            const name = document.getElementById('bookmark-name').value;
+            const url = document.getElementById('bookmark-url').value;
+            const logo = document.getElementById('bookmark-logo').value;
+
+            if (name && url) {
+                customBookmarks.push({ name, url, logo });
+                localStorage.setItem('customBookmarks', JSON.stringify(customBookmarks));
+                document.getElementById('bookmark-name').value = '';
+                document.getElementById('bookmark-url').value = '';
+                document.getElementById('bookmark-logo').value = '';
+                renderCustomBookmarks();
+                alert(`Bookmark added: ${name}`);
+            } else {
+                alert('Please enter both a name and a URL for the bookmark.');
+            }
+        }
+
+        function renderCustomBookmarks() {
+            const customFilesDiv = document.getElementById('custom-files');
+            customFilesDiv.innerHTML = ''; // Clear existing content
+
+            customBookmarks.forEach(bookmark => {
+                const fileLink = document.createElement('a');
+                fileLink.className = 'file';
+                fileLink.href = bookmark.url;
+                fileLink.target = '_blank';
+
+                if (bookmark.logo) {
+                    const logoImg = document.createElement('img');
+                    logoImg.src = bookmark.logo;
+                    logoImg.alt = bookmark.name;
+                    fileLink.appendChild(logoImg);
+                } else {
+                    const fileIcon = document.createElement('i');
+                    fileIcon.className = 'fas fa-file file-icon';
+                    fileLink.appendChild(fileIcon);
+                }
+
+                fileLink.appendChild(document.createTextNode(bookmark.name));
+                customFilesDiv.appendChild(fileLink);
+            });
+        }
+
+        function showClearCachePopup() {
+            const popup = document.getElementById('clearCachePopup');
+            popup.style.display = 'flex';
+        }
+
+        function hideClearCachePopup() {
+            const popup = document.getElementById('clearCachePopup');
+            popup.style.display = 'none';
+        }
+
+        function clearCache() {
+            customBookmarks = [];
+            localStorage.removeItem('customBookmarks');
+            renderCustomBookmarks();
+            alert('All bookmarks cleared successfully!');
+            hideClearCachePopup();
+        }
+
+        async function loadBookmarks() {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/sultanarabi161/Live-Note/refs/heads/main/folders-and-files.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                const explorerDiv = document.getElementById('explorer');
+                renderFolders(data.folders, explorerDiv);
+            } catch (error) {
+                console.error('Error loading bookmarks:', error);
+            }
+        }
+
+        function renderFolders(folders, container) {
+            folders.forEach(folder => {
+                const folderDiv = document.createElement('div');
+                folderDiv.className = 'folder';
+                folderDiv.onclick = (event) => toggleFolder(folderDiv, event);
+
+                const folderIcon = document.createElement('i');
+                folderIcon.className = 'fas fa-folder folder-icon';
+                
+                const folderName = document.createTextNode(folder.name);
+                folderDiv.appendChild(folderIcon);
+                folderDiv.appendChild(folderName);
+
+                const filesDiv = document.createElement('div');
+                filesDiv.className = 'files';
+
+                folder.files.forEach(file => {
+                    const fileLink = document.createElement('a');
+                    fileLink.className = 'file';
+                    fileLink.href = file.url;
+                    fileLink.target = '_blank';
+
+                    const fileIcon = document.createElement('i');
+                    fileIcon.className = 'fas fa-file file-icon';
+
+                    fileLink.appendChild(fileIcon);
+                    fileLink.appendChild(document.createTextNode(file.name));
+                    filesDiv.appendChild(fileLink);
+                });
+
+                folder.subfolders.forEach(subfolder => {
+                    const subfolderContainer = document.createElement('div');
+                    renderFolders([subfolder], subfolderContainer);
+                    filesDiv.appendChild(subfolderContainer);
+                });
+
+                folderDiv.appendChild(filesDiv);
+                container.appendChild(folderDiv);
+            });
+        }
+
+        function toggleFolder(element, event) {
+            element.classList.toggle('active');
+            event.stopPropagation();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadBookmarks();
+            // Create a custom folder for manually added bookmarks
+            const explorerDiv = document.getElementById('explorer');
+            const customFolderDiv = document.createElement('div');
+            customFolderDiv.className = 'folder';
+            customFolderDiv.id = 'custom-folder';
+
+            const customFolderIcon = document.createElement('i');
+            customFolderIcon.className = 'fas fa-folder folder-icon';
+            const customFolderName = document.createTextNode('Custom Bookmarks');
+            customFolderDiv.appendChild(customFolderIcon);
+            customFolderDiv.appendChild(customFolderName);
+
+            const customFilesDiv = document.createElement('div');
+            customFilesDiv.className = 'files';
+            customFilesDiv.id = 'custom-files'; // Add ID for custom files section
+            customFolderDiv.appendChild(customFilesDiv);
+
+            explorerDiv.appendChild(customFolderDiv);
+            customFolderDiv.onclick = (event) => {
+                toggleFolder(customFolderDiv, event);
+                renderCustomBookmarks(); // Render bookmarks when folder is opened
+            };
+
+            renderCustomBookmarks(); // Initialize bookmarks from local storage
+        });
+    </script>
+</body>
+</html>
+

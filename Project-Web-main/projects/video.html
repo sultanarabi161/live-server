@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            width: 98%;
+            padding: 10px 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .site-name {
+            font-size: 18px;
+        }
+
+        .icon {
+            cursor: pointer;
+        }
+
+        .video-container {
+            margin: 20px 0;
+            position: relative;
+            width: 98%;
+            max-width: 800px;
+        }
+
+        video {
+            width: 98%;
+            height: auto;
+        }
+
+        .channel-container {
+            width: 98%;
+            max-width: 800px;
+            overflow-y: auto;
+            max-height: 500px; /* Adjust height as needed */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .channel-item:hover {
+            background-color: #ddd;
+        }
+
+        .channel-logo {
+            width: 50px; /* Adjust logo size */
+            height: 50px; /* Adjust logo size */
+            margin-right: 10px;
+        }
+
+        .channel-name {
+            font-size: 16px;
+        }
+
+        .favorite-icon {
+            margin-left: auto;
+            cursor: pointer;
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px; /* Width of settings modal */
+            max-height: 80%;
+            overflow-y: auto; /* Allow scrolling */
+        }
+
+        .close-button {
+            cursor: pointer;
+            color: #007bff;
+            float: right;
+        }
+
+        .settings-label {
+            margin-top: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"></div>
+        <div class="site-name">Cracker IPTV</div>
+        <div class="icon" onclick="toggleSettings()">
+            <!-- SVG for Settings icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15.3c.1-.7.1-1.3.1-2 0-.7 0-1.3-.1-2l2.2-1.7c.2-.1.2-.3.1-.5l-2-3.5c-.1-.2-.3-.2-.5-.1l-2.5 1c-.6-.4-1.2-.8-1.9-1l-.4-2.7c-.1-.2-.3-.2-.5-.2h-4c-.2 0-.4 0-.5.2l-.4 2.7c-.7.2-1.3.6-1.9 1l-2.5-1c-.2-.1-.4 0-.5.1l-2 3.5c-.1.2 0 .4.1.5l2.2 1.7c-.1.7-.1 1.3-.1 2s0 1.3.1 2l-2.2 1.7c-.2.1-.2.3-.1.5l2 3.5c.1.2.3.2.5.1l2.5-1c.6.4 1.2.8 1.9 1l.4 2.7c.1.2.3.2.5.2h4c.2 0 .4 0 .5-.2l.4-2.7c.7-.2 1.3-.6 1.9-1l2.5 1c.2.1.4 0 .5-.1l2-3.5c.1-.2 0-.4-.1-.5l-2.2-1.7z"></path>
+            </svg>
+        </div>
+    </header>
+    
+    <div class="video-container">
+        <video id="video-player" controls>
+            <source id="video-source" src="" type="video/mp4">
+            <source id="video-source-ogg" src="" type="video/ogg">
+            <source id="video-source-webm" src="" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <div class="channel-container" id="channel-list"></div>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <span class="close-button" onclick="toggleSettings()">×</span>
+            <h3>Settings</h3>
+            <label class="settings-label">Volume:</label>
+            <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1" onchange="changeVolume(this.value)">
+            <label class="settings-label">Playback Quality:</label>
+            <select id="qualitySelect" onchange="changeQuality(this.value)">
+                <option value="720p">720p</option>
+                <option value="480p">480p</option>
+                <option value="360p">360p</option>
+            </select>
+            <button onclick="clearFavorites()">Clear Favorites</button>
+            <h4>Favorite Channels</h4>
+            <div id="favorite-channels"></div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const m3uLink = urlParams.get('m3u');
+        const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+        if (m3uLink) {
+            fetch(m3uLink)
+                .then(response => response.text())
+                .then(data => {
+                    const channels = parseM3U(data);
+                    loadChannels(channels);
+                })
+                .catch(error => console.error('Error fetching the m3u link:', error));
+        }
+
+        function parseM3U(data) {
+            const lines = data.split('\n');
+            const channels = [];
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith('#EXTINF:')) {
+                    const channelInfo = lines[i].split(',');
+                    const channelName = channelInfo[1].trim();
+                    const channelUrl = lines[i + 1].trim();
+                    
+                    // Extract logo URL if present in the line
+                    const logoMatch = channelInfo[0].match(/tvg-logo="([^"]+)"/);
+                    const logoUrl = logoMatch ? logoMatch[1] : 'https://via.placeholder.com/50'; // Fallback logo
+
+                    channels.push({ name: channelName, url: channelUrl, logo: logoUrl });
+                }
+            }
+            return channels;
+        }
+
+        function loadChannels(channels) {
+            const channelList = document.getElementById('channel-list');
+            channelList.innerHTML = ''; // Clear previous channels
+            channels.forEach(channel => {
+                const channelItem = document.createElement('div');
+                channelItem.className = 'channel-item';
+
+                const channelLogo = document.createElement('img');
+                channelLogo.src = channel.logo;
+                channelLogo.alt = channel.name;
+                channelLogo.className = 'channel-logo';
+
+                const channelName = document.createElement('div');
+                channelName.className = 'channel-name';
+                channelName.textContent = channel.name;
+
+                const favoriteIcon = document.createElement('span');
+                favoriteIcon.className = 'favorite-icon';
+                favoriteIcon.textContent = favorites.includes(channel.name) ? '★' : '☆'; // Show filled or empty star
+                favoriteIcon.onclick = (event) => {
+                    event.stopPropagation(); // Prevent the click from bubbling up
+                    toggleFavorite(channel.name);
+                    favoriteIcon.textContent = favorites.includes(channel.name) ? '★' : '☆'; // Update icon
+                };
+
+                channelItem.appendChild(channelLogo);
+                channelItem.appendChild(channelName);
+                channelItem.appendChild(favoriteIcon);
+                channelItem.onclick = () => {
+                    const videoSource = document.getElementById('video-source');
+                    videoSource.src = channel.url;
+                    document.getElementById('video-player').load();
+                    document.getElementById('video-player').play();
+                };
+                channelList.appendChild(channelItem);
+            });
+        }
+
+        function toggleFavorite(channelName) {
+            if (favorites.includes(channelName)) {
+                favorites.splice(favorites.indexOf(channelName), 1); // Remove from favorites
+            } else {
+                favorites.push(channelName); // Add to favorites
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites)); // Save to localStorage
+        }
+
+        function toggleSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            if (modal.style.display === 'flex') {
+                modal.style.justifyContent = 'center';
+                modal.style.alignItems = 'center';
+                loadFavoriteChannels(); // Load favorite channels when settings are opened
+            }
+        }
+
+        function loadFavoriteChannels() {
+            const favoriteChannelsContainer = document.getElementById('favorite-channels');
+            favoriteChannelsContainer.innerHTML = ''; // Clear previous favorites
+            favorites.forEach(channel => {
+                const channelItem = document.createElement('div');
+                channelItem.textContent = channel;
+                favoriteChannelsContainer.appendChild(channelItem);
+            });
+        }
+
+        function changeVolume(value) {
+            const videoPlayer = document.getElementById('video-player');
+            videoPlayer.volume = value; // Adjust volume based on the slider value
+        }
+
+        function changeQuality(value) {
+            alert(`Playback quality set to ${value}`); // Placeholder for quality change logic
+        }
+
+        function clearFavorites() {
+            localStorage.removeItem('favorites');
+            alert('Favorites cleared successfully!');
+            loadFavoriteChannels(); // Refresh the displayed favorite channels
+        }
+    </script>
+</body>
+</html>

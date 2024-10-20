@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat with Cracker AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.3/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+  <style>
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+    }
+
+    #toast.show {
+      visibility: visible;
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    @-webkit-keyframes fadein {
+      from {bottom: 0; opacity: 0;} 
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @-webkit-keyframes fadeout {
+      from {bottom: 30px; opacity: 1;} 
+      to {bottom: 0; opacity: 0;}
+    }
+
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .menu-sidebar {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 300px;
+      height: 100%;
+      background-color: white;
+      transition: left 0.3s ease-in-out;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .menu-sidebar.open {
+      left: 0;
+    }
+
+    .submenu {
+      display: none;
+      padding-left: 20px;
+    }
+
+    .submenu.open {
+      display: block;
+    }
+
+    .menu-item {
+      cursor: pointer;
+    }
+
+    .menu-item:hover {
+      background-color: #f0f0f0;
+    }
+
+    .menu-icon {
+      width: 20px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .chat-history-card {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .chat-history-card:hover {
+      transform: scale(1.02);
+    }
+
+    #settingsPanel {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1001;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+  <div class="menu-overlay" id="menuOverlay"></div>
+  <div class="menu-sidebar" id="menuSidebar">
+    <div class="p-4">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Menu</h2>
+        <button id="closeMenuButton" class="text-xl"><i class="fas fa-times"></i></button>
+      </div>
+      <ul class="space-y-2">
+        <li class="menu-item" onclick="toggleSubmenu('home')">
+          <span class="block py-2 px-4 hover:bg-gray-200 rounded">
+            <span class="menu-icon"><i class="fas fa-home"></i></span>
+            Home
+            <i class="fas fa-chevron-down float-right mt-1"></i>
+          </span>
+          <ul class="submenu" id="home-submenu">
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="dashboard">Dashboard</a></li>
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="quick-start">Quick Start</a></li>
+          </ul>
+        </li>
+        <li class="menu-item" onclick="toggleSubmenu('chat')">
+          <span class="block py-2 px-4 hover:bg-gray-200 rounded">
+            <span class="menu-icon"><i class="fas fa-comments"></i></span>
+            Chat
+            <i class="fas fa-chevron-down float-right mt-1"></i>
+          </span>
+          <ul class="submenu" id="chat-submenu">
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="new-chat">New Chat</a></li>
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="chat-history">Chat History</a></li>
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="saved-conversations">Saved Conversations</a></li>
+          </ul>
+        </li>
+        <li class="menu-item" onclick="toggleSubmenu('tools')">
+          <span class="block py-2 px-4 hover:bg-gray-200 rounded">
+            <span class="menu-icon"><i class="fas fa-tools"></i></span>
+            Tools
+            <i class="fas fa-chevron-down float-right mt-1"></i>
+          </span>
+          <ul class="submenu" id="tools-submenu">
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="text-analysis">Text Analysis</a></li>
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="code-generator">Code Generator</a></li>
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="language-translator">Language Translator</a></li>
+          </ul>
+        </li>
+        <li class="menu-item" onclick="toggleSubmenu('settings')">
+          <span class="block py-2 px-4 hover:bg-gray-200 rounded">
+            <span class="menu-icon"><i class="fas fa-cog"></i></span>
+            Settings
+            <i class="fas fa-chevron-down float-right mt-1"></i>
+          </span>
+          <ul class="submenu" id="settings-submenu">
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="general">General</a></li>
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="appearance">Appearance</a></li>
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="notifications">Notifications</a></li>
+            <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="privacy">Privacy</a></li>
+          </ul>
+        </li>
+        <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="help-faq">
+          <span class="menu-icon"><i class="fas fa-question-circle"></i></span>
+          Help & FAQ
+        </a></li>
+        <li><a href="#" class="block py-2 px-4 hover:bg-gray-200 rounded" data-action="about">
+          <span class="menu-icon"><i class="fas fa-info-circle"></i></span>
+          About
+        </a></li>
+      </ul>
+    </div>
+  </div>
+  
+  <header class="bg-white shadow">
+    <div class="container mx-auto px-4 py-2 flex justify-between items-center">
+      <button id="menuButton" class="text-xl"><i class="fas fa-bars"></i></button>
+      <h1 class="text-xl font-bold">Chat with Cracker AI</h1>
+      <div></div> <!-- Placeholder for right side of header -->
+    </div>
+  </header>
+
+  <div class="flex-grow container mx-auto py-6 px-4">
+    <div class="h-full w-full max-w-2xl mx-auto">
+      <div id="chatbox" class="flex flex-col items-start overflow-y-auto h-full p-1 rounded bg-white shadow-md" style="max-height: 70vh;">
+      </div>
+    </div>
+  </div>
+  <div class="sticky bottom-0 w-full">
+    <div class="flex justify-center">
+      <div class="px-2 w-full max-w-2xl">
+        <div class="flex flex-col my-5">
+          <input
+            class="shadow flex-grow rounded p-2 mb-2 border border-gray-300 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="messageInput"
+            type="text"
+            placeholder="Type your message"
+          />
+          <div class="flex justify-between space-x-2">
+            <button
+              class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 border-b-4 border-red-800 hover:border-red-600 rounded w-full sm:w-auto"
+              id="clearButton"
+            >
+              Clear Chat
+            </button>
+            <button
+              class="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded w-full sm:w-auto"
+              id="sendButton"
+            >
+              Ask Cracker!
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="toast">Text copied to clipboard!</div>
+  
+  <div id="settingsPanel">
+    <h2 class="text-2xl font-bold mb-4">Settings</h2>
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="fontSizeSelect">
+        Font Size
+      </label>
+      <select id="fontSizeSelect" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <option value="small">Small</option>
+        <option value="medium">Medium</option>
+        <option value="large">Large</option>
+      </select>
+    </div>
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="themeSelect">
+        Theme
+      </label>
+      <select id="themeSelect" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </div>
+    <button id="saveSettingsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+      Save Settings
+    </button>
+  </div>
+
+  <script>
+  const chatbox = document.getElementById("chatbox");
+  const messageInput = document.getElementById("messageInput");
+  const sendButton = document.getElementById("sendButton");
+  const clearButton = document.getElementById("clearButton");
+  const menuButton = document.getElementById("menuButton");
+  const closeMenuButton = document.getElementById("closeMenuButton");
+  const menuSidebar = document.getElementById("menuSidebar");
+  const menuOverlay = document.getElementById("menuOverlay");
+  const chatId = crypto.randomUUID();
+  let websocket = null;
+
+  let receiving = false;
+  const systemPrompt = "You are Cracker AI, a street racer and skilled mechanic known for your loyalty to family and friends.";
+
+  let settings = {
+    fontSize: 'medium',
+    theme: 'light'
+  };
+
+  function createMessageElement(text, alignment) {
+    const messageElement = document.createElement("div");
+    
+    messageElement.className = `inline-block my-2.5 p-2.5 rounded border ${
+      alignment === "left" ? "self-start bg-gray-200" : "self-end bg-green-200"
+    }`;
+messageElement.textContent = text;
+
+    messageElement.addEventListener("dblclick", () => {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(messageElement);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      document.execCommand('copy');
+      
+      showToast();
+    });
+
+    return messageElement;
+  }
+
+  function showToast() {
+    const toast = document.getElementById("toast");
+    toast.className = "show";
+    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+  }
+
+  function connectWebSocket(message, initChat) {
+    receiving = true;
+    sendButton.textContent = "Cancel";
+    const url = "wss://backend.buildpicoapps.com/api/chatbot/chat";
+    websocket = new WebSocket(url);
+
+    websocket.addEventListener("open", () => {
+      websocket.send(
+        JSON.stringify({
+          chatId: chatId,
+          appId: "music-husband",
+          systemPrompt: systemPrompt,
+          message: initChat ? "Welcome! I'm Cracker AI, your virtual assistant." : message,
+        })
+      );
+    });
+
+    const messageElement = createMessageElement("", "left");
+    chatbox.appendChild(messageElement);
+
+    websocket.onmessage = (event) => {
+      messageElement.textContent += event.data;
+      chatbox.scrollTop = chatbox.scrollHeight;
+    };
+
+    websocket.onclose = (event) => {
+      if (event.code === 1000) {
+        receiving = false;
+        sendButton.textContent = "Ask Cracker!";
+      } else {
+        messageElement.textContent += "Error getting response from server. Refresh the page and try again.";
+        chatbox.scrollTop = chatbox.scrollHeight;
+        receiving = false;
+        sendButton.textContent = "Ask Cracker!";
+      }
+    };
+  }
+
+  function createWelcomeMessage() {
+    connectWebSocket("", true);
+  }
+
+  function loadChatHistory() {
+    const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+    const historyContainer = document.createElement('div');
+    historyContainer.className = "space-y-4";
+
+    history.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = "chat-history-card bg-white shadow-md rounded p-4";
+      card.textContent = `Chat ${index + 1}: ${item.messages[0].text.slice(0, 20)}...`;
+      card.addEventListener('click', () => openChatHistory(index));
+      historyContainer.appendChild(card);
+    });
+
+    chatbox.innerHTML = "";
+    chatbox.appendChild(historyContainer);
+  }
+
+  function openChatHistory(index) {
+    const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+    const chat = history[index];
+    chatbox.innerHTML = "";
+
+    chat.messages.forEach(item => {
+      const messageElement = createMessageElement(item.text, item.alignment);
+      chatbox.appendChild(messageElement);
+    });
+
+    chatbox.scrollTop = chatbox.scrollHeight;
+  }
+
+  function saveChatMessage(text, alignment) {
+    const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+    if (!history.length || history[history.length - 1].finished) {
+      history.push({ messages: [], finished: false });
+    }
+    history[history.length - 1].messages.push({ text, alignment });
+    localStorage.setItem('chatHistory', JSON.stringify(history));
+  }
+
+  function finishCurrentChat() {
+    const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+    if (history.length) {
+      history[history.length - 1].finished = true;
+      localStorage.setItem('chatHistory', JSON.stringify(history));
+    }
+  }
+
+  function loadSettings() {
+    const savedSettings = JSON.parse(localStorage.getItem('settings'));
+    if (savedSettings) {
+      settings = {...settings, ...savedSettings};
+    }
+    applySettings();
+  }
+
+  function saveSettings() {
+    localStorage.setItem('settings', JSON.stringify(settings));
+    applySettings();
+  }
+
+  function applySettings() {
+    document.body.className = `bg-${settings.theme === 'dark' ? 'gray-800' : 'gray-100'} flex flex-col min-h-screen`;
+    document.body.style.fontSize = settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '18px' : '16px';
+    
+    const chatbox = document.getElementById('chatbox');
+    chatbox.className = `flex flex-col items-start overflow-y-auto h-full p-1 rounded ${settings.theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white'} shadow-md`;
+    
+    const messageInput = document.getElementById('messageInput');
+    messageInput.className = `shadow flex-grow rounded p-2 mb-2 border ${settings.theme === 'dark' ? 'bg-gray-600 text-white' : 'bg-white text-gray-700'} border-gray-300 leading-tight focus:outline-none focus:shadow-outline`;
+  }
+
+  function showSettingsPanel() {
+    const settingsPanel = document.getElementById('settingsPanel');
+    settingsPanel.style.display = 'block';
+    
+    const fontSizeSelect = document.getElementById('fontSizeSelect');
+    fontSizeSelect.value = settings.fontSize;
+    
+    const themeSelect = document.getElementById('themeSelect');
+    themeSelect.value = settings.theme;
+  }
+
+  function toggleMenu() {
+    menuSidebar.classList.toggle("open");
+    menuOverlay.style.display = menuOverlay.style.display === "block" ? "none" : "block";
+  }
+
+  function toggleSubmenu(id) {
+    const submenu = document.getElementById(`${id}-submenu`);
+    submenu.classList.toggle("open");
+  }
+
+  function handleMenuAction(action) {
+    switch(action) {
+      case 'dashboard':
+        connectWebSocket("Show me the dashboard", false);
+        break;
+      case 'quick-start':
+        connectWebSocket("How do I get started quickly?", false);
+        break;
+      case 'new-chat':
+        chatbox.innerHTML = "";
+        localStorage.removeItem('chatHistory');
+        createWelcomeMessage();
+        break;
+      case 'chat-history':
+        loadChatHistory();
+        break;
+      case 'saved-conversations':
+        connectWebSocket("Show me my saved conversations", false);
+        break;
+      case 'text-analysis':
+        connectWebSocket("Analyze this text", false);
+        break;
+      case 'code-generator':
+        connectWebSocket("Generate some code", false);
+        break;
+      case 'language-translator':
+        connectWebSocket("Translate this text", false);
+        break;
+      case 'general':
+      case 'appearance':
+        showSettingsPanel();
+        break;
+      case 'notifications':
+        connectWebSocket("Manage notifications", false);
+        break;
+      case 'privacy':
+        connectWebSocket("Open privacy settings", false);
+        break;
+      case 'help-faq':
+        connectWebSocket("I need help", false);
+        break;
+      case 'about':
+        connectWebSocket("Tell me about this app", false);
+        break;
+      default:
+        console.log('Unknown action:', action);
+    }
+  }
+
+  sendButton.addEventListener("click", () => {
+    if (!receiving && messageInput.value.trim() !== "") {
+      const messageText = messageInput.value.trim();
+      messageInput.value = "";
+      const messageElement = createMessageElement(messageText, "right");
+      chatbox.appendChild(messageElement);
+      chatbox.scrollTop = chatbox.scrollHeight;
+      saveChatMessage(messageText, "right");
+
+      connectWebSocket(messageText, false);
+    } else if (receiving && websocket) {
+      websocket.close(1000);
+      receiving = false;
+      sendButton.textContent = "Ask Cracker!";
+    }
+  });
+
+  messageInput.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Enter" &&
+      !receiving &&
+      messageInput.value.trim() !== ""
+    ) {
+      event.preventDefault();
+      sendButton.click();
+    }
+  });
+
+  clearButton.addEventListener("click", () => {
+    chatbox.innerHTML = "";
+    localStorage.removeItem('chatHistory');
+  });
+
+  menuButton.addEventListener("click", toggleMenu);
+  closeMenuButton.addEventListener("click", toggleMenu);
+  menuOverlay.addEventListener("click", toggleMenu);
+
+  document.querySelectorAll('[data-action]').forEach(item => {
+    item.addEventListener('click', (event) => {
+      const action = event.currentTarget.getAttribute('data-action');
+      handleMenuAction(action);
+      toggleMenu();
+    });
+  });
+
+  document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+    settings.fontSize = document.getElementById('fontSizeSelect').value;
+    settings.theme = document.getElementById('themeSelect').value;
+    saveSettings();
+    document.getElementById('settingsPanel').style.display = 'none';
+  });
+
+  loadSettings();
+  loadChatHistory();
+  createWelcomeMessage();
+</script>
+
+</body>
+</html>

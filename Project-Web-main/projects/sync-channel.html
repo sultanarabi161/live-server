@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Box Sync</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .channel-box {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .copy-button {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .channel-item:hover .copy-button {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">Advanced Channel Box Sync</h1>
+        
+        <div class="mb-6">
+            <input type="text" id="m3uUrl" class="w-full p-2 border rounded" value="https://raw.githubusercontent.com/sultanarabi161/bd-playlist/main/all-category.m3u" placeholder="Enter M3U playlist URL">
+            <div class="flex justify-between mt-2">
+                <button onclick="loadChannels()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Load Channels</button>
+                <button onclick="saveToLocalStorage()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save Playlist</button>
+                <button onclick="loadFromLocalStorage()" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Load Saved Playlist</button>
+                <button onclick="toggleDebugInfo()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Toggle Debug Info</button>
+            </div>
+        </div>
+
+        <div id="debugInfo" class="mb-4 p-4 bg-gray-200 rounded hidden">
+            <h3 class="font-bold mb-2">Debug Information:</h3>
+            <pre id="debugText" class="whitespace-pre-wrap"></pre>
+        </div>
+
+        <div class="mb-4">
+            <input type="text" id="searchBox" class="w-full p-2 border rounded" onkeyup="searchAndFilterChannels()" placeholder="Search channels...">
+        </div>
+
+        <div class="flex mb-4">
+            <select id="categoryFilter" class="p-2 border rounded mr-2" onchange="searchAndFilterChannels()">
+                <option value="">All Categories</option>
+            </select>
+            <select id="sortOrder" class="p-2 border rounded" onchange="sortChannels()">
+                <option value="nameAsc">Name (A-Z)</option>
+                <option value="nameDesc">Name (Z-A)</option>
+                <option value="categoryAsc">Category (A-Z)</option>
+                <option value="categoryDesc">Category (Z-A)</option>
+            </select>
+        </div>
+
+        <div id="loadingIndicator" class="text-center hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <p>Loading channels...</p>
+        </div>
+
+        <div class="channel-box bg-white shadow-md rounded p-4" id="channelBox">
+            <!-- Channels will be displayed here -->
+        </div>
+
+        <div class="mt-4 text-center">
+            <span id="channelCount" class="font-bold"></span>
+        </div>
+
+        <!-- Video Player Modal -->
+        <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+            <div class="bg-white p-4 rounded-lg w-full max-w-4xl">
+                <h2 id="videoTitle" class="text-2xl font-bold mb-4"></h2>
+                <div class="aspect-w-16 aspect-h-9">
+                    <video id="videoPlayer" controls class="w-full h-full">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <button onclick="closeVideoPlayer()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let channels = [];
+        let categories = new Set();
+        let debugMode = false;
+
+        function showLoading(show) {
+            document.getElementById('loadingIndicator').classList.toggle('hidden', !show);
+        }
+
+        async function loadChannels() {
+            showLoading(true);
+            const m3uUrl = document.getElementById('m3uUrl').value;
+            try {
+                const response = await fetch(m3uUrl);
+                const data = await response.text();
+                parseM3U(data);
+                updateCategoryFilter();
+                displayChannels(channels);
+                showLoading(false);
+            } catch (error) {
+                console.error('Error fetching M3U file:', error);
+                alert('Failed to load the playlist. Please check the URL and try again.');
+                showLoading(false);
+            }
+        }
+
+        function parseM3U(data) {
+            channels = [];
+            categories.clear();
+            const lines = data.split('\n');
+            let channelInfo = {};
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line.startsWith('#EXTINF:')) {
+                    channelInfo = {};
+                    // Extract all attributes
+                    const attributes = line.match(/([a-zA-Z-]+)="([^"]*)"/g);
+                    if (attributes) {
+                        attributes.forEach(attr => {
+                            const [key, value] = attr.split('=');
+                            channelInfo[key.toLowerCase()] = value.replace(/"/g, '');
+                        });
+                    }
+                    // Extract channel name (after the last comma)
+                    const nameMatch = line.match(/,(.+)$/);
+                    if (nameMatch) {
+                        channelInfo.name = nameMatch[1].trim();
+                    }
+                    
+                    if (channelInfo['group-title']) {
+                        categories.add(channelInfo['group-title']);
+                    }
+                } else if (line.startsWith('http')) {
+                    channelInfo.url = line;
+                    channels.push(channelInfo);
+                }
+            }
+
+            if (debugMode) {
+                updateDebugInfo();
+            }
+        }
+
+        function updateDebugInfo() {
+            const debugText = document.getElementById('debugText');
+            debugText.textContent = `Total Channels: ${channels.length}\n\nFirst 5 Channels:\n${JSON.stringify(channels.slice(0, 5), null, 2)}`;
+        }
+
+        function toggleDebugInfo() {
+            debugMode = !debugMode;
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.classList.toggle('hidden', !debugMode);
+            if (debugMode) {
+                updateDebugInfo();
+            }
+        }
+
+        function updateCategoryFilter() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            [...categories].sort().forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+        }
+
+        function displayChannels(channelsToDisplay) {
+            const channelBox = document.getElementById('channelBox');
+            channelBox.innerHTML = '';
+            
+            channelsToDisplay.forEach(channel => {
+                const channelItem = document.createElement('div');
+                channelItem.className = 'channel-item flex items-center p-2 border-b';
+                channelItem.innerHTML = `
+                    <img src="${channel['tvg-logo'] || '/api/placeholder/48'}" alt="${channel.name} logo" class="w-12 h-12 object-contain mr-4">
+                    <div class="flex-grow">
+                        <h3 class="font-bold">${channel.name}</h3>
+                        <p class="text-sm text-gray-600">${channel['group-title'] || 'Uncategorized'}</p>
+                        <input type="text" value="${channel.url}" class="w-full bg-gray-100 p-1 text-sm" readonly>
+                        <div class="flex space-x-2 mt-2">
+                            <button onclick="watchChannel('${channel.url}', '${channel.name}')" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">Watch</button>
+                            <button onclick="copyToClipboard('${channel.name}')" class="copy-button bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400">Copy Name</button>
+                            <button onclick="copyToClipboard('${channel.url}')" class="copy-button bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400">Copy Link</button>
+                        </div>
+                    </div>
+                `;
+                channelBox.appendChild(channelItem);
+            });
+
+            updateChannelCount(channelsToDisplay.length);
+        }
+
+        function searchAndFilterChannels() {
+            const searchValue = document.getElementById('searchBox').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            const filteredChannels = channels.filter(channel => 
+                (channel.name.toLowerCase().includes(searchValue) || 
+                 (channel['group-title'] && channel['group-title'].toLowerCase().includes(searchValue))) &&
+                (categoryFilter === '' || channel['group-title'] === categoryFilter)
+            );
+
+            displayChannels(filteredChannels);
+        }
+
+        function sortChannels() {
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            channels.sort((a, b) => {
+                switch(sortOrder) {
+                    case 'nameAsc':
+                        return a.name.localeCompare(b.name);
+                    case 'nameDesc':
+                        return b.name.localeCompare(a.name);
+                    case 'categoryAsc':
+                        return (a['group-title'] || '').localeCompare(b['group-title'] || '');
+                    case 'categoryDesc':
+                        return (b['group-title'] || '').localeCompare(a['group-title'] || '');
+                }
+            });
+
+            searchAndFilterChannels(); // Apply current search and filter after sorting
+        }
+
+        function updateChannelCount(count) {
+            document.getElementById('channelCount').textContent = `Total Channels: ${count}`;
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('savedPlaylist', JSON.stringify({
+                url: document.getElementById('m3uUrl').value,
+                channels: channels
+            }));
+            alert('Playlist saved successfully!');
+        }
+
+        function loadFromLocalStorage() {
+            const savedPlaylist = JSON.parse(localStorage.getItem('savedPlaylist'));
+            if (savedPlaylist) {
+                document.getElementById('m3uUrl').value = savedPlaylist.url;
+                channels = savedPlaylist.channels;
+                updateCategoryFilter();
+                displayChannels(channels);
+                alert('Saved playlist loaded successfully!');
+            } else {
+                alert('No saved playlist found.');
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        function watchChannel(url, name) {
+            const videoModal = document.getElementById('videoModal');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoTitle = document.getElementById('videoTitle');
+
+            videoTitle.textContent = name;
+            videoPlayer.src = url;
+            videoModal.classList.remove('hidden');
+            videoModal.classList.add('flex');
+            videoPlayer.play();
+        }
+
+        function closeVideoPlayer() {
+            const videoModal = document.getElementById('videoModal');
+            const videoPlayer = document.getElementById('videoPlayer');
+
+            videoPlayer.pause();
+            videoPlayer.src = '';
+            videoModal.classList.add('hidden');
+            videoModal.classList.remove('flex');
+        }
+
+        // Initial load
+        loadChannels();
+    </script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropbox Notepad</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.0.3/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.3/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/markdown/markdown.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
+    <style>
+        .CodeMirror {
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold mb-6">Enhanced Dropbox Notepad</h1>
+        
+        <div id="noteSection">
+            <div class="flex mb-4">
+                <input type="text" id="fileName" placeholder="File name" class="flex-grow p-2 border rounded-l">
+                <select id="fileFormat" class="p-2 border-t border-b border-r">
+                    <option value="txt">.txt</option>
+                    <option value="md">.md</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <textarea id="noteArea" placeholder="Type your notes here..."></textarea>
+            </div>
+            
+            <div class="flex space-x-2 mb-4">
+                <button onclick="saveNote()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save Note</button>
+                <button onclick="window.open('https://www.dropbox.com/scl/fo/4zfbacff21gh4j3sxt6lf/ADQX-aKb_hSW07tL7u7hAxE?rlkey=s1nt2pqvy2gpqmfihqxkc3obn&st=rgbjdd5c&dl=0', '_blank');" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Load Notes</button>
+                <button onclick="togglePreview()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Toggle Preview</button>
+                <button onclick="createFolder()" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Create Folder</button>
+            </div>
+
+            <div id="previewArea" class="hidden mb-4 p-4 border rounded"></div>
+            
+            <div id="folderStructure" class="mb-4"></div>
+            
+            <div id="fileList" class="border rounded p-4"></div>
+
+            <div id="searchSection" class="mt-4">
+                <input type="text" id="searchInput" placeholder="Search notes..." class="w-full p-2 border rounded mb-2">
+                <button onclick="searchNotes()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TODO: Replace with your actual access token
+        const ACCESS_TOKEN = 'sl.B-wqDmHOBY-XAw0jyFMhcKeVZzAmR5AuDa8Ucp5NfQdQH2s-w_t3fZEFBsbsn9bzXCeo4gpNqirkkfY5ZD4UPIMg2wmhhd0kMV7f_cn4uNa9iuOoxLTCG1F2XpoxD8xnEZjt4Wq1eeh2kDskVwCgCkA';
+        const dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
+        const folderPath = '/enhanced_notes/';
+        let editor;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            editor = CodeMirror.fromTextArea(document.getElementById('noteArea'), {
+                mode: 'markdown',
+                lineNumbers: true,
+                theme: 'default'
+            });
+
+            // Check if the base folder exists, if not create it
+            checkAndCreateBaseFolder();
+        });
+
+        function checkAndCreateBaseFolder() {
+            dbx.filesListFolder({ path: '' })
+                .then(response => {
+                    const folderExists = response.entries.some(entry => entry.name === 'enhanced_notes' && entry['.tag'] === 'folder');
+                    if (!folderExists) {
+                        return dbx.filesCreateFolderV2({ path: folderPath });
+                    }
+                })
+                .then(() => {
+                    console.log("Base folder checked/created successfully");
+                })
+                .catch(error => {
+                    console.error("Error checking/creating base folder:", error);
+                    handleError(error);
+                });
+        }
+
+        function saveNote() {
+            const fileName = document.getElementById('fileName').value.trim() || `note_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+            const fileFormat = document.getElementById('fileFormat').value;
+            const noteContent = editor.getValue();
+            const filePath = `${folderPath}${fileName}.${fileFormat}`;
+
+            dbx.filesUpload({ path: filePath, contents: noteContent, mode: 'overwrite' })
+                .then(response => {
+                    console.log("Note saved to Dropbox:", response);
+                    alert("Note saved successfully!");
+                })
+                .catch(error => {
+                    console.error("Error saving note:", error);
+                    handleError(error);
+                });
+        }
+
+        function togglePreview() {
+            const previewArea = document.getElementById('previewArea');
+            
+            if (previewArea.classList.contains('hidden')) {
+                const noteContent = editor.getValue();
+                const fileFormat = document.getElementById('fileFormat').value;
+                
+                let htmlContent;
+                if (fileFormat === 'md') {
+                    htmlContent = DOMPurify.sanitize(marked(noteContent));
+                } else {
+                    htmlContent = DOMPurify.sanitize(noteContent.replace(/\n/g, '<br>'));
+                }
+                
+                previewArea.innerHTML = htmlContent;
+                previewArea.classList.remove('hidden');
+                editor.getWrapperElement().style.display = 'none';
+            } else {
+                previewArea.classList.add('hidden');
+                editor.getWrapperElement().style.display = '';
+            }
+        }
+
+        function createFolder() {
+            const folderName = prompt("Enter the name for the new folder:");
+            if (folderName) {
+                const newFolderPath = `${folderPath}${folderName}`;
+                dbx.filesCreateFolderV2({ path: newFolderPath })
+                    .then(response => {
+                        console.log("Folder created:", response);
+                        alert("Folder created successfully!");
+                    })
+                    .catch(error => {
+                        console.error("Error creating folder:", error);
+                        handleError(error);
+                    });
+            }
+        }
+
+        function searchNotes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            dbx.filesSearch({ path: folderPath, query: searchTerm })
+                .then(response => {
+                    const searchResults = response.matches.map(match => match.metadata);
+                    const fileListDiv = document.getElementById('fileList');
+                    fileListDiv.innerHTML = '<h3 class="font-bold mb-2">Search Results:</h3>';
+
+                    searchResults.forEach(file => {
+                        if (file['.tag'] === 'file') {
+                            const fileDiv = document.createElement('div');
+                            fileDiv.className = 'flex justify-between items-center mb-2';
+                            
+                            const fileLink = document.createElement('a');
+                            fileLink.href = '#';
+                            fileLink.textContent = file.name;
+                            fileLink.className = 'text-blue-500 hover:underline';
+                            fileLink.onclick = () => loadNote(file.path_lower);
+                            
+                            fileDiv.appendChild(fileLink);
+                            fileListDiv.appendChild(fileDiv);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error searching notes:", error);
+                    handleError(error);
+                });
+        }
+
+        function handleError(error) {
+            let errorMessage = "An error occurred. ";
+
+            if (error.status === 401) {
+                errorMessage += "Your access token may be invalid or expired. Please check and update your Dropbox access token.";
+            } else if (error.status === 403) {
+                errorMessage += "You don't have permission to perform this action. Please check your Dropbox app permissions.";
+            } else if (error.status === 404) {
+                errorMessage += "The file or folder was not found. It may have been moved or deleted.";
+            } else if (error.status === 409) {
+                errorMessage += "There was a conflict with the current state. The folder might already exist.";
+            } else {
+                errorMessage += "Please try again later or contact support if the problem persists.";
+            }
+
+            alert(errorMessage);
+        }
+    </script>
+</body>
+</html>
