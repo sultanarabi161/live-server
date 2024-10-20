@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cracker IPTV</title>
+    <style>
+        /* Previous CSS styles remain unchanged */
+
+
+body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .site-name {
+            font-size: 18px;
+        }
+
+        .icon {
+            cursor: pointer;
+        }
+
+        main {
+            padding: 20px;
+            flex: 1;
+        }
+
+        .search-box,
+        .m3u-input-box {
+            max-width: 600px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .search-box input,
+        .m3u-input-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .m3u-input-box {
+            display: none;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 10px 0;
+            width: 100%;
+            position: relative;
+            margin-top: auto;
+        }
+
+        .m3u-display {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            color: #333;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .m3u-display:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .m3u-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .m3u-description {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+
+
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://i.ibb.co/mq5pTPn/1000009338.jpg" alt="Logo" class="logo" style="height: 40px;">
+        <div class="site-name">Cracker IPTV</div>
+        <div class="icon" onclick="toggleM3UInput()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </div>
+    </header>
+    <main>
+        <div class="search-box">
+            <input type="text" placeholder="Search...">
+        </div>
+        <div class="m3u-input-box">
+            <input type="text" id="m3u-input" placeholder="Enter m3u link">
+            <button onclick="addM3ULink()">Add</button>
+        </div>
+        <div id="default-m3u-container"></div>
+        <div id="custom-m3u-container"></div>
+    </main>
+    <footer>
+        <p>© 2024 Cracker IPTV. All rights reserved.</p>
+        <button onclick="showClearCachePopup()">Clear Cache</button>
+    </footer>
+
+    <div class="popup" id="clearCachePopup">
+        <div class="popup-content">
+            <h3>Clear Cache</h3>
+            <p>Are you sure you want to clear the cache?</p>
+            <button onclick="clearCache()">Yes</button>
+            <button onclick="hideClearCachePopup()">No</button>
+        </div>
+    </div>
+
+    <script>
+        let playlistCount = 1;
+        const DEFAULT_PLAYLISTS = [
+            {name: 'Default Pro Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/sultan-m3u-playlist/refs/heads/main/sultan-playlist.m3u', isDefault: true},
+            {name: 'Default Stand Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/new-iptv-playlist/refs/heads/main/newiptv.m3u', isDefault: true}
+        ];
+
+        function toggleM3UInput() {
+            const m3uInputBox = document.querySelector('.m3u-input-box');
+            m3uInputBox.style.display = m3uInputBox.style.display === 'none' || m3uInputBox.style.display === '' ? 'flex' : 'none';
+        }
+
+        function fetchLinkData(m3uLink) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const linkData = {
+                        name: `Playlist ${playlistCount}`,
+                        description: `Click for streaming channels`,
+                        url: m3uLink,
+                        isDefault: false
+                    };
+                    playlistCount++;
+                    resolve(linkData);
+                }, 1000);
+            });
+        }
+
+        function addM3ULink() {
+            const m3uInput = document.getElementById('m3u-input').value;
+            if (m3uInput) {
+                fetchLinkData(m3uInput).then(linkData => {
+                    createCard(linkData);
+                    document.getElementById('m3u-input').value = '';
+                    saveLinkData(linkData);
+                });
+            }
+        }
+
+        function saveLinkData(linkData) {
+            let savedLinks = JSON.parse(localStorage.getItem('m3uLinks')) || [];
+            savedLinks.push(linkData);
+            localStorage.setItem('m3uLinks', JSON.stringify(savedLinks));
+        }
+
+        function createCard(linkData) {
+            const container = linkData.isDefault ? document.getElementById('default-m3u-container') : document.getElementById('custom-m3u-container');
+            const m3uCard = document.createElement('div');
+            m3uCard.className = 'm3u-display';
+
+            const m3uName = document.createElement('div');
+            m3uName.className = 'm3u-name';
+            m3uName.textContent = linkData.name;
+
+            const m3uDescription = document.createElement('div');
+            m3uDescription.className = 'm3u-description';
+            m3uDescription.textContent = linkData.description;
+
+            m3uCard.appendChild(m3uName);
+            m3uCard.appendChild(m3uDescription);
+
+            if (!linkData.isDefault) {
+                const editButton = document.createElement('button');
+                editButton.className = 'button edit-button';
+                editButton.textContent = 'Edit';
+                editButton.onclick = (e) => {
+                    e.stopPropagation();
+                    editLink(linkData, m3uName, m3uCard);
+                };
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'button delete-button';
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteLink(m3uCard, linkData);
+                };
+
+                m3uCard.appendChild(editButton);
+                m3uCard.appendChild(deleteButton);
+            }
+
+            m3uCard.onclick = () => {
+                window.location.href = `video.html?m3u=${encodeURIComponent(linkData.url)}`;
+            };
+
+            container.appendChild(m3uCard);
+        }
+
+        function editLink(linkData, m3uName, m3uCard) {
+            const newName = prompt("Edit playlist name:", linkData.name);
+            const newURL = prompt("Edit playlist URL:", linkData.url);
+            if (newName && newURL) {
+                linkData.name = newName;
+                linkData.url = newURL;
+                m3uName.textContent = linkData.name;
+                saveUpdatedLinks();
+            }
+        }
+
+        function deleteLink(m3uCard, linkData) {
+            m3uCard.remove();
+            let savedLinks = JSON.parse(localStorage.getItem('m3uLinks')) || [];
+            savedLinks = savedLinks.filter(link => link.url !== linkData.url);
+            localStorage.setItem('m3uLinks', JSON.stringify(savedLinks));
+        }
+
+        function saveUpdatedLinks() {
+            let savedLinks = JSON.parse(localStorage.getItem('m3uLinks')) || [];
+            localStorage.setItem('m3uLinks', JSON.stringify(savedLinks));
+        }
+
+        function loadSavedLinks() {
+            const savedLinks = JSON.parse(localStorage.getItem('m3uLinks')) || [];
+            savedLinks.forEach(linkData => createCard(linkData));
+            playlistCount = savedLinks.length + 1;
+        }
+
+        window.onload = function() {
+            DEFAULT_PLAYLISTS.forEach(playlist => createCard(playlist));
+            loadSavedLinks();
+        };
+
+        function showClearCachePopup() {
+            const popup = document.getElementById('clearCachePopup');
+            popup.style.display = 'flex';
+        }
+
+        function hideClearCachePopup() {
+            const popup = document.getElementById('clearCachePopup');
+            popup.style.display = 'none';
+        }
+
+        function clearCache() {
+            localStorage.setItem('m3uLinks', JSON.stringify([]));
+            alert('Cache cleared successfully! Custom playlists have been removed.');
+            hideClearCachePopup();
+            location.reload();
+        }
+    </script>
+</body>
+</html>

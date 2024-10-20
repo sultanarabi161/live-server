@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Folder Explorer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://cdn.dribbble.com/users/1171903/screenshots/16780085/project.co_4x.jpg
+">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f5f5;
+            --text-color: #333;
+            --hover-color: #e8f0fe;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        #explorer-container {
+            width: 95%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #explorer {
+            height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .search-bar button {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-bar button:hover {
+            background-color: #3a7bd5;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .folder, .file {
+            padding: 10px;
+            cursor: pointer;
+            display: block;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .folder:hover, .file:hover {
+            background-color: var(--hover-color);
+        }
+
+        .files {
+            padding-left: 20px;
+            display: none;
+            list-style-type: none;
+            margin: 0;
+        }
+
+        .active > .files {
+            display: block;
+        }
+
+        .folder-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #ffd700;
+        }
+
+        .file-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #4caf50;
+        }
+
+        #footer {
+            background-color: var(--secondary-color);
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            border-top: 1px solid var(--border-color);
+        }
+
+        #footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        #footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="explorer-container">
+        <div id="header">
+            <span>Modern Explorer</span>
+        </div>
+        <div id="explorer">
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="Search folders or files">
+                <button onclick="searchFiles()"><i class="fas fa-search"></i> Search</button>
+                
+            </div>
+            <div class="breadcrumb" id="breadcrumb">Home</div>
+            
+            <!-- Main Folder 1 -->
+            <div class="folder" onclick="toggleFolder(this, event)">
+                <i class="fas fa-folder folder-icon"></i>Main Folder 1
+                <div class="files">
+                    <div class="folder" onclick="toggleFolder(this, event)">
+                        <i class="fas fa-folder folder-icon"></i>Projects 
+                        <div class="files">
+                            <a class="file" href="https://sultanarabi-portfolio.netlify.app/" target="_blank">
+                                <i class="fas fa-file-code file-icon"></i>Portfolio
+                            </a>
+                            <a class="file" href="https://sultanarabi161.github.io/live-server-/projects/code-editor.html" target="_blank">
+                                <i class="fas fa-file-code file-icon"></i>Live Code
+                            </a>
+                        </div>
+                    </div>
+                    <div class="folder" onclick="toggleFolder(this, event)">
+                        <i class="fas fa-folder folder-icon"></i>Tools 
+                        <div class="files">
+                            <a class="file" href="https://example.com/qrcode" target="_blank">
+                                <i class="fas fa-qrcode file-icon"></i>QR Code
+                            </a>
+                            <a class="file" href="https://example.com/project" target="_blank">
+                                <i class="fas fa-file-archive file-icon"></i>Project Files
+                            </a>
+                            <a class="file" href="https://mega.nz/filerequest/o_tYuS3sUII" target="_blank">
+                                <i class="fas fa-file-upload file-icon"></i>Files Transfer
+                            </a>
+                        </div>
+                    </div>
+                    <a class="file" href="https://ibn-stream.netlify.app/" target="_blank">
+                        <i class="fas fa-tv file-icon"></i>Stream Live TV
+                    </a>
+                    <a class="file" href="https://example.com/mainfile2" target="_blank">
+                        <i class="fas fa-sticky-note file-icon"></i>Notepad
+                    </a>
+                    <a class="file" href="https://sultanarabi161.github.io/live-server-/projects/crackpad.html" target="_blank">
+                       <i class="fas fa-file-alt file-icon"></i>Crackpad
+                     </a>
+
+                    <a class="file" href="https://sultanarabi161.github.io/live-server-/projects/m3u-link-checker.html" target="_blank">
+                        <i class="fas fa-link file-icon"></i>m3u to live streaming 
+                    </a>
+                    <a class="file" href="https://sultanarabi161.github.io/live-server-/projects/ask-ai.html" target="_blank">
+                        <i class="fas fa-robot file-icon"></i>Ask AI
+                    </a>
+                    
+                    <a class="file" href="https://sultan-projects.netlify.app/social-media.html" target="_blank">
+                    <i class="fas fa-share-alt file-icon"></i>Social media
+                    </a>
+
+
+                    
+                </div>
+            </div>
+
+            <!-- Main Folder 2 -->
+            <div class="folder" onclick="toggleFolder(this, event)">
+                <i class="fas fa-folder folder-icon"></i>Main Folder 2
+                <div class="files">
+                    <div class="folder" onclick="toggleFolder(this, event)">
+                        <i class="fas fa-folder folder-icon"></i>Blog's
+                        <div class="files">
+                            <a class="file" href="https://sultanarabi.news.blog" target="_blank">
+                                <i class="fas fa-blog file-icon"></i>সুলতান আরাবি
+                            </a>
+                            <a class="file" href="https://quran.com" target="_blank">
+                                <i class="fas fa-book file-icon"></i>কুরআন
+                            </a>
+                        </div>
+                    </div>
+                    <div class="folder" onclick="toggleFolder(this, event)">
+                        <i class="fas fa-folder folder-icon"></i>Writers 
+                        <div class="files">
+                            <a class="file" href="https://example.com/reports" target="_blank">
+                                <i class="fas fa-file-alt file-icon"></i>Reports
+                            </a>
+                            <a class="file" href="https://example.com/summary" target="_blank">
+                                <i class="fas fa-file-alt file-icon"></i>Summary
+                            </a>
+                        </div>
+                    </div>
+                    <a class="file" href="https://example.com/mainfile4" target="_blank">
+                        <i class="fas fa-sync file-icon"></i>Raindrop syncing 
+                    </a>
+                    <a class="file" href="https://example.com/mainfile5" target="_blank">
+                        <i class="fas fa-users file-icon"></i>Public 
+                    </a>
+                    <a class="file" href="https://cracker2161.github.io/github-live-server/" target="_blank">
+                        <i class="fas fa-server file-icon"></i>Live server 
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Folder 3 -->
+            <div class="folder" onclick="toggleFolder(this, event)">
+                <i class="fas fa-folder folder-icon"></i>Developer's 
+                <div class="files">
+                    <div class="folder" onclick="toggleFolder(this, event)">
+                        <i class="fas fa-folder folder-icon"></i>About 
+                        <div class="files">
+                            <a class="file" href="https://sultanarabi.netlify.app/" target="_blank">
+                                <i class="fas fa-id-card file-icon"></i>Digital Card 
+                            </a>
+                            <a class="file" href="https://example.com/analysis" target="_blank">
+                                <i class="fas fa-users file-icon"></i>Social
+                            </a>
+                        </div>
+                    </div>
+                    <div class="folder" onclick="toggleFolder(this, event)">
+                        <i class="fas fa-folder folder-icon"></i>Privacy 🔏 
+                        <div class="files">
+                            <a class="file" href="https://example.com/reports" target="_blank">
+                                <i class="fas fa-list file-icon"></i>List 
+                            </a>
+                            <a class="file" href="https://example.com/summary" target="_blank">
+                                <i class="fas fa-thumbs-up file-icon"></i>Like
+                            </a>
+                        </div>
+                    </div>
+                    <a class="file" href="https://example.com/mainfile4" target="_blank">
+                        <i class="fab fa-facebook file-icon"></i>Facebook
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            Created by <a href="https://example.com" target="_blank">Sultan</a> | Version 2.0
+        </div>
+    </div>
+
+    <script>
+    function toggleFolder(element, event) {
+        element.classList.toggle('active');
+        event.stopPropagation();
+    }
+
+    function searchFiles() {
+        const searchTerm = document.getElementById('search').value.toLowerCase();
+        const filesAndFolders = document.querySelectorAll('.folder, .file');
+
+        filesAndFolders.forEach(item => {
+            const shouldShow = item.textContent.toLowerCase().includes(searchTerm);
+            item.style.display = shouldShow ? 'block' : 'none';
+            
+            if (item.classList.contains('folder') && shouldShow) {
+                let parent = item.parentElement;
+                while (parent && !parent.classList.contains('explorer')) {
+                    if (parent.classList.contains('files')) {
+                        parent.style.display = 'block';
+                    }
+                    if (parent.classList.contains('folder')) {
+                        parent.style.display = 'block';
+                    }
+                    parent = parent.parentElement;
+                }
+            }
+        });
+    }
+
+    function toggleAllFolders() {
+        const folders = document.querySelectorAll('.folder');
+        folders.forEach(folder => {
+            folder.classList.toggle('active');
+        });
+    }
+    </script>
+</body>
+</html>
+

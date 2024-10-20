@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Sultan's IPTV</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333333;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s forwards;
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        h1 {
+            text-align: center;
+            color: #ff5a60;
+            animation: bounce 1s;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        h2 {
+            color: #ff5a60;
+        }
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .developer-photo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .developer-photo img {
+            width: 180px; /* Adjust size as needed */
+            height: 180px; /* Adjust size as needed */
+            border-radius: 50%; /* This makes the image circular */
+            object-fit: cover; /* This maintains the aspect ratio */
+            border: 2px solid #ff5a60; /* Optional: adds a border */
+        }
+        .social-media {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .social-media a {
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 24px;
+            color: #ff5a60;
+            transition: transform 0.3s;
+        }
+        .social-media a:hover {
+            transform: scale(1.2);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #ff5a60;
+            color: white;
+            border-radius: 5px;
+            animation: slideIn 0.5s forwards;
+            opacity: 0;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .download-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .download-button {
+            background-color: #ff5a60;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .download-button:hover {
+            background-color: #e04e56;
+            transform: scale(1.05);
+        }
+        .info-card {
+            display: flex;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+        .info-card img {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            margin-right: 20px;
+            transition: transform 0.3s;
+        }
+        .info-card img:hover {
+            transform: scale(1.1);
+        }
+        .info-card-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .info-card-details h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .info-card-details p {
+            margin: 5px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="developer-photo">
+            <img src="https://i.ibb.co/P4NnRbs/1000009136.jpg" alt="Developer Photo">
+        </div>
+        <h1>About Me</h1>
+        <h2>I'm Sultan</h2>
+        <p>
+            My name is Sultan and I am the creator of this IPTV project. I have a deep interest in technology and I always enjoy working on new ideas and innovations. 
+            My goal is to simplify people's lives through advanced technology.
+        </p>
+        
+        <h2>About My IPTV</h2>
+        <p>
+            My IPTV service is an advanced and user-friendly platform for users. 
+            Here you can watch various channels and live TV shows. 
+            I have worked hard to ensure the highest quality video and user experience while creating this service.
+        </p>
+        
+        <div class="info-card">
+            <img src="https://i.ibb.co/g41Lzqy/1000007185.jpg" alt="IPTV Image">
+            <div class="info-card-details">
+                <h3>IPTV App</h3>
+                <p><strong>App Version:</strong> 1.0.7</p>
+                <p><strong>Channel Version:</strong> 0.1.7</p>
+                <p><strong>Latest Update:</strong> 15th September 2024</p>
+                <p><strong>Features:</strong> High-quality streams, user-friendly interface, multi-device support.</p>
+                <div class="download-section">
+                    <a href="https://example.com/download" class="download-button">Download</a>
+                </div>
+            </div>
+        </div>
+
+        <h2>Developer Information</h2>
+        <p><strong>Name:</strong> Sultan Arabi</p>
+        <p><strong>Email:</strong> sultanarabi161@gmail.com</p>
+        <p><strong>Website:</strong> <a href="https://sultanarabi.news.blog">sultanarabi.news.blog</a></p>
+
+        <h2>Contact Me</h2>
+        <p>
+            If you have any questions or comments, feel free to reach out to me.
+        </p>
+
+        <div class="social-media">
+            <a href="https://facebook.com" target="_blank">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.597 0 0 .593 0 1.325v21.35C0 23.407.593 24 1.325 24h21.35C23.407 24 24 23.407 24 22.675v-21.35C24 .593 23.407 0 22.675 0zM12 24c-6.627 0-12-5.373-12-12S5.373 0 12 0s12 5.373 12 12-5.373 12-12 12zm6.5-18h-3.5V4.5c0-.827-.673-1.5-1.5-1.5h-2c-.827 0-1.5.673-1.5 1.5V6h-3v3h3v9h3v-9h3l.5-3z"/></svg>
+            </a>
+            <a href="https://twitter.com" target="_blank">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557a9.962 9.962 0 0 1-2.825.775A4.927 4.927 0 0 0 23.338 3a9.935 9.935 0 0 1-3.127 1.197A4.916 4.916 0 0 0 16.616 0c-2.716 0-4.922 2.206-4.922 4.922 0 .386.043.761.127 1.124C7.691 5.04 4.066 3.1 1.64 0.64a4.922 4.922 0 0 0-.666 2.477c0 1.71.87 3.213 2.188 4.094a4.898 4.898 0 0 1-2.228-.615v.061c0 2.39 1.694 4.382 3.948 4.843a4.946 4.946 0 0 1-2.224.085c.629 1.963 2.445 3.395 4.596 3.433a9.869 9.869 0 0 1-6.099 2.095c-.396 0-.787-.023-1.174-.067a13.935 13.935 0 0 0 7.548 2.213c9.057 0 14.007-7.502 14.007-13.986 0-.21 0-.42-.014-.629A10.002 10.002 0 0 0 24 4.557z"/></svg>
+            </a>
+            <a href="https://instagram.com" target="_blank">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.206 0 3.578.012 4.84.069 1.257.056 1.894.274 2.332.463a4.823 4.823 0 0 1 1.748 1.15 4.823 4.823 0 0 1 1.15 1.748c.189.438.407 1.075.463 2.332.057 1.262.069 1.634.069 4.84s-.012 3.578-.069 4.84c-.056 1.257-.274 1.894-.463 2.332a4.823 4.823 0 0 1-1.15 1.748 4.823 4.823 0 0 1-1.748 1.15c-.438.189-1.075.407-2.332.463-1.262.057-1.634.069-4.84.069s-3.578-.012-4.84-.069c-1.257-.056-1.894-.274-2.332-.463a4.823 4.823 0 0 1-1.748-1.15 4.823 4.823 0 0 1-1.15-1.748c-.189-.438-.407-1.075-.463-2.332C2.175 15.741 2.163 15.369 2.163 12s.012-3.578.069-4.84c.056-1.257.274-1.894.463-2.332a4.823 4.823 0 0 1 1.15-1.748A4.823 4.823 0 0 1 7.26 2.63c.438-.189 1.075-.407 2.332-.463C8.422 2.175 8.793 2.163 12 2.163zm0 5.843a6.157 6.157 0 1 0 0 12.314 6.157 6.157 0 0 0 0-12.314zm0 10.314a4.157 4.157 0 1 1 0-8.314 4.157 4.157 0 0 1 0 8.314zm5.25-10.314a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0z"/></svg>
+            </a>
+            <a href="https://linkedin.com" target="_blank">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M22.225 0h-20.45C.996 0 0 .996 0 2.225v19.55C0 23.004.996 24 2.225 24h20.45C23.004 24 24 23.004 24 22.225v-19.55C24 .996 23.004 0 22.225 0zM7.148 20.452H3.6V9.905h3.548v10.547zm-1.774-12.057c-1.131 0-1.832-.754-1.832-1.696 0-.975.715-1.696 1.82-1.696 1.116 0 1.832.721 1.839 1.696 0 .942-.702 1.696-1.836 1.696zm16.076 12.057h-3.547v-5.694c0-1.438-.028-3.287-2.002-3.287-2.001 0-2.304 1.563-2.304 3.187v5.794h-3.547V9.905h3.4v1.438h.05c.474-.898 1.634-1.848 3.357-1.848 3.593 0 4.254 2.364 4.254 5.43v6.027z"/></svg>
+            </a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>About more <a href="pro.html">Click</a></p>
+    </div>
+</body>
+</html>
