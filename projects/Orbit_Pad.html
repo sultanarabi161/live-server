@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium Mobile Notepad</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --toolbar-height: 56px;
+            --bottom-bar-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background-color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--toolbar-height);
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .editor-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #editor {
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            border: none;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.5;
+            outline: none;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .bottom-toolbar {
+            background-color: white;
+            padding: 0.5rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            height: var(--bottom-bar-height);
+            position: relative;
+            z-index: 100;
+        }
+
+        .toolbar-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 0.75rem;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .toolbar-btn i {
+            font-size: 1.2rem;
+        }
+
+        .toolbar-btn:active {
+            opacity: 0.7;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 100%;
+            max-height: 80vh;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+            animation: slideUp 0.3s ease-out;
+            overflow-y: auto;
+        }
+
+        .modal-option {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+
+        .modal-option:hover {
+            background-color: #f8f9fa;
+        }
+
+        .modal-option i {
+            width: 24px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .modal-option:last-child {
+            border-bottom: none;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .history-list {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .note-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .note-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .note-date {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .note-preview {
+            font-size: 0.9rem;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.5rem;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .note-action-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .edit-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .status-pill {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 2000;
+            max-width: 80%;
+            white-space: pre-wrap;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .formatting-bar {
+            display: flex;
+            overflow-x: auto;
+            background-color: #f8f9fa;
+            padding: 8px;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
+            display: none;
+        }
+
+        .format-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: white;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .dark-mode {
+            --background-color: #1a1a1a;
+            --text-color: #ffffff;
+            --border-color: #333333;
+        }
+
+        .dark-mode .header,
+        .dark-mode .bottom-toolbar,
+        .dark-mode .modal-content,
+        .dark-mode #editor {
+            background-color: #2d2d2d;
+            color: white;
+        }
+
+        .dark-mode .modal-option:hover {
+            background-color: #3d3d3d;
+        }
+
+        .dark-mode .note-date,
+        .dark-mode .note-preview {
+            color: #999;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        #editor::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #editor::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #editor::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div class="app-container">
+        <div class="header">
+            <button class="menu-btn" onclick="toggleFormatting()">
+                <i class="fas fa-text-height"></i>
+            </button>
+            <h1>Premium Notes</h1>
+            <button class="menu-btn" onclick="showOptions()">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+        </div>
+
+        <div class="formatting-bar" id="formatting-bar">
+            <button class="format-btn" onclick="formatText('bold')">Bold</button>
+            <button class="format-btn" onclick="formatText('italic')">Italic</button>
+            <button class="format-btn" onclick="formatText('bullet')">• Bullet</button>
+            <button class="format-btn" onclick="formatText('number')">1. Number</button>
+            <button class="format-btn" onclick="formatText('checkbox')">☐ Checkbox</button>
+            <button class="format-btn" onclick="formatText('heading')">Heading</button>
+        </div>
+
+        <div class="editor-container">
+            <textarea id="editor" placeholder="Start writing..."></textarea>
+        </div>
+
+        <div class="bottom-toolbar">
+            <button class="toolbar-btn" onclick="newNote()">
+                <i class="fas fa-file"></i>
+                <span>New</span>
+            </button>
+            <button class="toolbar-btn" onclick="shareNote()">
+                <i class="fas fa-share-alt"></i>
+                <span>Share</span>
+            </button>
+            <button class="toolbar-btn" onclick="saveNote()">
+                <i class="fas fa-save"></i>
+                <span>Save</span>
+            </button>
+            <button class="toolbar-btn" onclick="toggleDarkMode()">
+                <i class="fas fa-moon"></i>
+                <span>Theme</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="options-modal">
+        <div class="modal-content">
+            <div class="modal-option" onclick="undoAction()">
+                <i class="fas fa-undo"></i>
+                <span>Undo</span>
+            </div>
+            <div class="modal-option" onclick="redoAction()">
+                <i class="fas fa-redo"></i>
+                <span>Redo</span>
+            </div>
+            <div class="modal-option" onclick="formatText('heading')">
+                <i class="fas fa-heading"></i>
+                <span>Add Heading</span>
+            </div>
+            <div class="modal-option" onclick="insertDateTime()">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Insert Date/Time</span>
+            </div>
+            <div class="modal-option" onclick="wordCount()">
+                <i class="fas fa-calculator"></i>
+                <span>Word Count</span>
+            </div>
+            <div class="modal-option" onclick="changeFontSize()">
+                <i class="fas fa-font"></i>
+                <span>Font Size</span>
+            </div>
+            <div class="modal-option" onclick="clearFormatting()">
+                <i class="fas fa-remove-format"></i>
+                <span>Clear Formatting</span>
+            </div>
+            <div class="modal-option" onclick="showHistory()">
+                <i class="fas fa-history"></i>
+                <span>Note History</span>
+            </div>
+            <div class="modal-option" onclick="exportNote()">
+                <i class="fas fa-file-export"></i>
+                <span>Export Note</span>
+            </div>
+            <div class="modal-option" onclick="exportAllNotes()">
+                <i class="fas fa-file-export"></i>
+                <span>Export All Notes</span>
+            </div>
+            <div class="modal-option" onclick="importNotes()">
+                <i class="fas fa-file-import"></i>
+                <span>Import Note</span>
+            </div>
+            <div class="modal-option" onclick="searchInNote()">
+                <i class="fas fa-search"></i>
+                <span>Find in Note</span>
+            </div>
+            <div class="modal-option" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+                <span>Close</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="history-modal">
+        <div class="modal-content">
+            <div class="history-header">
+                <h2>Note History</h2>
+                <button class="menu-btn" onclick="closeHistoryModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="history-list" id="history-list">
+                <!-- Notes will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="status-pill" id="status-pill"></div>
+
+
+
+    <script>
+        const editor = document.getElementById('editor');
+        const modal = document.getElementById('options-modal');
+        const historyModal = document.getElementById('history-modal');
+        const historyList = document.getElementById('history-list');
+        const statusPill = document.getElementById('status-pill');
+        const formattingBar = document.getElementById('formatting-bar');
+
+        let savedContent = '';
+        let lastSavedTime = Date.now();
+        let undoStack = [];
+        let redoStack = [];
+        let notes = [];
+
+        // Initialize
+        function init() {
+            loadSavedContent();
+            setupAutoSave();
+            setupTouchHandling();
+            loadPreferences();
+            enhanceStatusPill();
+        }
+
+        // Load saved content
+        function loadSavedContent() {
+            const saved = localStorage.getItem('mobile-notepad-content');
+            if (saved) {
+                editor.value = saved;
+                savedContent = saved;
+                undoStack.push(saved);
+            }
+        }
+
+        // Auto-save setup
+        function setupAutoSave() {
+            setInterval(() => {
+                if (editor.value !== savedContent) {
+                    localStorage.setItem('mobile-notepad-content', editor.value);
+                    savedContent = editor.value;
+                    showStatus('Auto-saved');
+                }
+            }, 5000);
+        }
+
+        // Touch handling
+        function setupTouchHandling() {
+            let touchStartY = 0;
+            let touchStartTime = 0;
+
+            editor.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+                touchStartTime = Date.now();
+            });
+
+            editor.addEventListener('touchend', (e) => {
+                const touchEndY = e.changedTouches[0].clientY;
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime;
+                
+                if (touchDuration < 200 && Math.abs(touchEndY - touchStartY) > 100) {
+                    toggleFormatting();
+                }
+            });
+        }
+
+        // Note History Functions
+        function saveNoteToHistory() {
+            const currentNote = {
+                id: Date.now(),
+                title: getFirstLine(editor.value) || 'Untitled Note',
+                content: editor.value,
+                date: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+
+            notes = getNotes();
+            notes.push(currentNote);
+            localStorage.setItem('notes-history', JSON.stringify(notes));
+            return currentNote;
+        }
+
+        function getFirstLine(text) {
+            const firstLine = text.split('\n')[0].trim();
+            return firstLine.length > 30 ? firstLine.substring(0, 30) + '...' : firstLine;
+        }
+
+        function getNotes() {
+            const savedNotes = localStorage.getItem('notes-history');
+            return savedNotes ? JSON.parse(savedNotes) : [];
+        }
+
+        function showHistory() {
+            closeModal();
+            historyModal.style.display = 'flex';
+            renderNotesList();
+        }
+
+        function closeHistoryModal() {
+            historyModal.style.display = 'none';
+        }
+
+        function renderNotesList() {
+            notes = getNotes();
+            historyList.innerHTML = notes.length === 0 
+                ? '<div class="note-item">No saved notes</div>'
+                : notes.reverse().map(note => createNoteItem(note)).join('');
+        }
+
+        function createNoteItem(note) {
+            const date = new Date(note.lastModified).toLocaleString();
+            const preview = note.content.length > 50 
+                ? note.content.substring(0, 50) + '...'
+                : note.content;
+
+            return `
+                <div class="note-item" data-id="${note.id}">
+                    <div class="note-item-header">
+                        <div class="note-title">${note.title}</div>
+                        <div class="note-date">${date}</div>
+                    </div>
+                    <div class="note-preview">${preview}</div>
+                    <div class="note-actions">
+                        <button class="note-action-btn edit-btn" onclick="editNote(${note.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="note-action-btn delete-btn" onclick="deleteNote(${note.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function editNote(noteId) {
+            const note = notes.find(n => n.id === noteId);
+            if (note) {
+                if (editor.value !== savedContent) {
+                    if (confirm('Save current note before switching?')) {
+                        saveNote();
+                    }
+                }
+                editor.value = note.content;
+                savedContent = note.content;
+                closeHistoryModal();
+                showStatus('Note loaded');
+            }
+        }
+
+        function deleteNote(noteId) {
+            if (confirm('Are you sure you want to delete this note?')) {
+                notes = notes.filter(n => n.id !== noteId);
+                localStorage.setItem('notes-history', JSON.stringify(notes));
+                renderNotesList();
+                showStatus('Note deleted');
+            }
+        }
+
+        // Format text functions
+        function formatText(type) {
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const selectedText = editor.value.substring(start, end);
+            let formattedText = '';
+
+            switch(type) {
+                case 'bold':
+                    formattedText = `**${selectedText}**`;
+                    break;
+                case 'italic':
+                    formattedText = `_${selectedText}_`;
+                    break;
+                case 'bullet':
+                    formattedText = `• ${selectedText}`;
+                    break;
+                case 'number':
+                    formattedText = `1. ${selectedText}`;
+                    break;
+                case 'checkbox':
+                    formattedText = `☐ ${selectedText}`;
+                    break;
+                case 'heading':
+                    formattedText = `\n# ${selectedText}\n`;
+                    break;
+            }
+
+            editor.value = editor.value.substring(0, start) + formattedText + editor.value.substring(end);
+            editor.focus();
+            undoStack.push(editor.value);
+            closeModal();
+        }
+
+        // Utility functions
+        function showStatus(message) {
+            statusPill.textContent = message;
+            statusPill.style.display = 'block';
+            setTimeout(() => {
+                statusPill.style.display = 'none';
+            }, 2000);
+        }
+
+        function toggleFormatting() {
+            formattingBar.style.display = formattingBar.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function newNote() {
+            if (editor.value !== savedContent) {
+                if (confirm('Save current note?')) {
+                    saveNote();
+                }
+            }
+            editor.value = '';
+            savedContent = '';
+            undoStack = [''];
+            redoStack = [];
+            showStatus('New note created');
+        }
+
+        function saveNote() {
+            if (editor.value.trim() !== '') {
+                const note = saveNoteToHistory();
+                localStorage.setItem('mobile-notepad-content', editor.value);
+                savedContent = editor.value;
+                lastSavedTime = Date.now();
+                showStatus('Note saved');
+            } else {
+                showStatus('Cannot save empty note');
+            }
+        }
+
+        function shareNote() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Note',
+                    text: editor.value
+                }).catch(console.error);
+            } else {
+                showStatus('Sharing not supported');
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('dark-mode', document.body.classList.contains('dark-mode'));
+            showStatus('Theme changed');
+        }
+
+        function undoAction() {
+            if (undoStack.length > 1) {
+                redoStack.push(editor.value);
+                undoStack.pop(); // Remove current state
+                editor.value = undoStack[undoStack.length - 1];
+                showStatus('Undo successful');
+            } else {
+                showStatus('Nothing to undo');
+            }
+            closeModal();
+        }
+
+        function redoAction() {
+            if (redoStack.length > 0) {
+                undoStack.push(editor.value);
+                editor.value = redoStack.pop();
+                showStatus('Redo successful');
+            } else {
+                showStatus('Nothing to redo');
+            }
+            closeModal();
+        }
+
+        function insertDateTime() {
+            const now = new Date();
+            const dateTime = now.toLocaleString();
+            const cursorPos = editor.selectionStart;
+            editor.value = editor.value.slice(0, cursorPos) + dateTime + editor.value.slice(cursorPos);
+            undoStack.push(editor.value);
+            showStatus('Date/Time inserted');
+            closeModal();
+        }
+
+        function wordCount() {
+            const text = editor.value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            const chars = text.length;
+            const lines = text ? text.split('\n').length : 0;
+            showStatus(`Words: ${words}\nCharacters: ${chars}\nLines: ${lines}`);
+            closeModal();
+        }
+
+        function clearFormatting() {
+            const text = editor.value.replace(/[*_#•☐]/g, '').replace(/^\d+\.\s/gm, '');
+            editor.value = text;
+            undoStack.push(editor.value);
+            showStatus('Formatting cleared');
+            closeModal();
+        }
+
+        function changeFontSize() {
+            const sizes = ['14px', '16px', '18px', '20px'];
+            const currentSize = editor.style.fontSize || '16px';
+            const currentIndex = sizes.indexOf(currentSize);
+            const nextSize = sizes[(currentIndex + 1) % sizes.length];
+            editor.style.fontSize = nextSize;
+            localStorage.setItem('font-size', nextSize);
+            showStatus(`Font size: ${nextSize}`);
+            closeModal();
+        }
+
+        function exportNote() {
+            const blob = new Blob([editor.value], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `note_${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            closeModal();
+            showStatus('Note exported');
+        }
+
+        function exportAllNotes() {
+            const notes = getNotes();
+            let exportContent = '';
+            
+            notes.forEach((note, index) => {
+                exportContent += `=== Note ${index + 1} ===\n`;
+                exportContent += `Title: ${note.title}\n`;
+                exportContent += `Date: ${new Date(note.date).toLocaleString()}\n`;
+                exportContent += `Content:\n${note.content}\n\n`;
+            });
+
+            const blob = new Blob([exportContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `all_notes_${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showStatus('All notes exported');
+            closeModal();
+        }
+
+        function importNotes() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.txt';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    const content = event.target.result;
+                    try {
+                        const newNote = {
+                            id: Date.now(),
+                            title: file.name.replace('.txt', ''),
+                            content: content,
+                            date: new Date().toISOString(),
+                            lastModified: new Date().toISOString()
+                        };
+                        
+                        notes = getNotes();
+                        notes.push(newNote);
+                        localStorage.setItem('notes-history', JSON.stringify(notes));
+                        showStatus('Note imported successfully');
+                    } catch(err) {
+                        showStatus('Error importing note');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+            closeModal();
+        }
+
+        function searchInNote() {
+            const searchTerm = prompt('Enter search term:');
+            if (searchTerm) {
+                const text = editor.value.toLowerCase();
+                const term = searchTerm.toLowerCase();
+                const index = text.indexOf(term);
+                if (index !== -1) {
+                    editor.focus();
+                    editor.setSelectionRange(index, index + term.length);
+                    showStatus('Text found');
+                } else {
+                    showStatus('Text not found');
+                }
+            }
+            closeModal();
+        }
+
+        function showOptions() {
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // Event listeners
+        editor.addEventListener('input', () => {
+            if (Date.now() - lastSavedTime > 1000) {
+                localStorage.setItem('mobile-notepad-content', editor.value);
+                lastSavedTime = Date.now();
+            }
+            undoStack.push(editor.value);
+            redoStack = [];
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        historyModal.addEventListener('click', (e) => {
+            if (e.target === historyModal) {
+                closeHistoryModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key.toLowerCase()) {
+                    case 's':
+                        e.preventDefault();
+                        saveNote();
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        newNote();
+                        break;
+                    case 'z':
+                        e.preventDefault();
+                        undoAction();
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        redoAction();
+                        break;
+                }
+            }
+        });
+
+        // Handle visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                saveNote();
+            }
+        });
+
+        // Prevent accidental navigation
+        window.addEventListener('beforeunload', (e) => {
+            if (editor.value !== savedContent) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        
+        
+        // Handle mobile back button
+        window.addEventListener('popstate', (e) => {
+            e.preventDefault();
+            if (modal.style.display === 'flex') {
+                closeModal();
+            } else if (historyModal.style.display === 'flex') {
+                closeHistoryModal();
+            } else if (formattingBar.style.display === 'flex') {
+                toggleFormatting();
+            } else if (editor.value !== savedContent) {
+                if (confirm('Save changes before leaving?')) {
+                    saveNote();
+                }
+            }
+        });
+
+        // Load preferences
+        function loadPreferences() {
+            if (localStorage.getItem('dark-mode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            const savedFontSize = localStorage.getItem('font-size');
+            if (savedFontSize) {
+                editor.style.fontSize = savedFontSize;
+            }
+        }
+
+        // Enhance status pill
+        function enhanceStatusPill() {
+            statusPill.style.maxWidth = '80%;';
+            statusPill.style.whiteSpace = 'pre-wrap';
+            statusPill.style.textAlign = 'center';
+            statusPill.style.padding = '12px 20px';
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
