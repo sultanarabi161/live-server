@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>উন্নত ভিডিও স্ট্রিমিং প্লেয়ার</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.20.3/video-js.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.20.3/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        #videoContainer {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #urlInput {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        #urlInput:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+        .button {
+            padding: 12px 20px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        .button:active {
+            transform: translateY(0);
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .player-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .history {
+            margin-top: 30px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .history h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+        .history-item {
+            cursor: pointer;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.3s ease;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-item:hover {
+            background-color: #f5f5f5;
+        }
+        .active-player {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="videoContainer"></div>
+        <input type="text" id="urlInput" placeholder="এখানে চ্যানেল লিঙ্ক দিন">
+        <div class="controls">
+            <button id="playButton" class="button">
+                <i class="fas fa-play"></i> প্লে করুন
+            </button>
+            <div class="player-options">
+                <button class="button player-select" data-player="html5">HTML5</button>
+                <button class="button player-select" data-player="videojs">Video.js</button>
+                <button class="button player-select" data-player="hlsjs">HLS.js</button>
+            </div>
+        </div>
+        <div class="history">
+            <h3>সাম্প্রতিক লিঙ্ক</h3>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPlayer = null;
+        let selectedPlayer = 'html5';
+        let history = JSON.parse(localStorage.getItem('channelHistory')) || [];
+
+        function updateHistory(url) {
+            history = history.filter(item => item !== url);
+            history.unshift(url);
+            if (history.length > 5) history.pop();
+            localStorage.setItem('channelHistory', JSON.stringify(history));
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            history.forEach(url => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.textContent = url;
+                item.onclick = () => {
+                    document.getElementById('urlInput').value = url;
+                    playVideo(url);
+                };
+                historyList.appendChild(item);
+            });
+        }
+
+        function selectPlayer(player) {
+            selectedPlayer = player;
+            document.querySelectorAll('.player-select').forEach(btn => {
+                btn.classList.toggle('active-player', btn.dataset.player === player);
+            });
+            if (currentPlayer) {
+                playVideo(document.getElementById('urlInput').value);
+            }
+        }
+
+        function playVideo(url) {
+            if (currentPlayer) {
+                if (typeof currentPlayer.dispose === 'function') {
+                    currentPlayer.dispose();
+                } else if (currentPlayer.pause) {
+                    currentPlayer.pause();
+                }
+                currentPlayer = null;
+            }
+
+            const videoContainer = document.getElementById('videoContainer');
+            videoContainer.innerHTML = '';
+
+            updateHistory(url);
+
+            switch (selectedPlayer) {
+                case 'html5':
+                    setupHTML5Player(url);
+                    break;
+                case 'videojs':
+                    setupVideoJSPlayer(url);
+                    break;
+                case 'hlsjs':
+                    setupHLSJSPlayer(url);
+                    break;
+            }
+        }
+
+        function setupHTML5Player(url) {
+            const video = document.createElement('video');
+            video.src = url;
+            video.controls = true;
+            video.style.width = '100%';
+            video.style.height = '100%';
+            document.getElementById('videoContainer').appendChild(video);
+            currentPlayer = video;
+            video.play().catch(e => console.error('Playback failed:', e));
+        }
+
+        function setupVideoJSPlayer(url) {
+            const videoElement = document.createElement('video');
+            videoElement.className = 'video-js';
+            videoElement.controls = true;
+            document.getElementById('videoContainer').appendChild(videoElement);
+            currentPlayer = videojs(videoElement, { autoplay: true, fluid: true });
+            currentPlayer.src({ type: 'application/x-mpegURL', src: url });
+        }
+
+        function setupHLSJSPlayer(url) {
+            if (Hls.isSupported()) {
+                const video = document.createElement('video');
+                video.controls = true;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                document.getElementById('videoContainer').appendChild(video);
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+                currentPlayer = video;
+            } else {
+                console.error('HLS is not supported in this browser.');
+                alert('আপনার ব্রাউজারে HLS সাপোর্টেড নয়। অন্য প্লেয়ার ব্যবহার করুন।');
+            }
+        }
+
+        document.getElementById('playButton').addEventListener('click', function() {
+            const url = document.getElementById('urlInput').value;
+            if (url) {
+                playVideo(url);
+            } else {
+                alert('দয়া করে একটি বৈধ URL প্রদান করুন।');
+            }
+        });
+
+        document.querySelectorAll('.player-select').forEach(button => {
+            button.addEventListener('click', function() {
+                selectPlayer(this.dataset.player);
+            });
+        });
+
+        displayHistory();
+    </script>
+</body>
+</html>
