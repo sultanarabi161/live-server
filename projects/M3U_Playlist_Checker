@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium M3U Playlist Checker & Player</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f5f6fa;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .input-group input[type="file"],
+        .input-group input[type="url"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .player-container {
+            margin-bottom: 2rem;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .channels-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .channel-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .channel-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-working {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .status-error {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .filter-section {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #fff;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-section {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Premium M3U Playlist Checker & Player</h1>
+            <p>Check and play your M3U playlists with advanced features</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="input-group">
+                <label for="playlist-file">Upload M3U File:</label>
+                <input type="file" id="playlist-file" accept=".m3u,.m3u8">
+            </div>
+            <div class="input-group">
+                <label for="playlist-url">Or Enter M3U URL:</label>
+                <input type="url" id="playlist-url" placeholder="https://example.com/playlist.m3u">
+            </div>
+            <button class="btn" onclick="checkPlaylist()">Check Playlist</button>
+        </div>
+
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Analyzing playlist...</p>
+        </div>
+
+        <div class="results-section" style="display: none;">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Total Channels</h3>
+                    <div class="stat-number" id="total-channels">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Working Channels</h3>
+                    <div class="stat-number" id="working-channels">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Failed Channels</h3>
+                    <div class="stat-number" id="failed-channels">0</div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <button class="filter-btn active" data-filter="all">All Channels</button>
+                <button class="filter-btn" data-filter="working">Working</button>
+                <button class="filter-btn" data-filter="failed">Failed</button>
+            </div>
+
+            <div class="player-container">
+                <video id="video-player" controls>
+                    Your browser does not support the video element.
+                </video>
+            </div>
+
+            <div class="channels-list" id="channels-list"></div>
+        </div>
+    </div>
+
+    <script>
+        class PlaylistChecker {
+            constructor() {
+                this.channels = [];
+                this.currentFilter = 'all';
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.currentFilter = e.target.dataset.filter;
+                        this.updateFilterButtons();
+                        this.displayChannels();
+                    });
+                });
+            }
+
+            updateFilterButtons() {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.filter === this.currentFilter);
+                });
+            }
+
+            async checkPlaylist() {
+                const file = document.getElementById('playlist-file').files[0];
+                const url = document.getElementById('playlist-url').value;
+
+                if (!file && !url) {
+                    alert('Please provide either a file or URL');
+                    return;
+                }
+
+                this.showLoading(true);
+                this.channels = [];
+
+                try {
+                    let content;
+                    if (file) {
+                        content = await this.readFile(file);
+                    } else {
+                        content = await this.fetchUrl(url);
+                    }
+
+                    await this.parsePlaylist(content);
+                    await this.checkChannels();
+                    this.displayChannels();
+                    this.updateStats();
+                } catch (error) {
+                    console.error('Error processing playlist:', error);
+                    alert('Error processing playlist. Please check the console for details.');
+                }
+
+                this.showLoading(false);
+            }
+
+            showLoading(show) {
+                document.querySelector('.loading-spinner').style.display = show ? 'block' : 'none';
+                document.querySelector('.results-section').style.display = show ? 'none' : 'block';
+            }
+
+            async readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsText(file);
+                });
+            }
+
+            async fetchUrl(url) {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch playlist URL');
+                }
+                return response.text();
+            }
+
+            async parsePlaylist(content) {
+                const lines = content.split('\n');
+                let currentChannel = null;
+
+                for (const line of lines) {
+                    if (line.startsWith('#EXTINF:')) {
+                        currentChannel = {
+                            title: line.split(',')[1]?.trim(),
+                            status: 'pending'
+                        };
+                    } else if (line.trim() && !line.startsWith('#') && currentChannel) {
+                        currentChannel.url = line.trim();
+                        this.channels.push(currentChannel);
+                        currentChannel = null;
+                    }
+                }
+            }
+
+            async checkChannels() {
+                const checks = this.channels.map(channel => this.checkChannel(channel));
+                await Promise.all(checks);
+            }
+
+            async checkChannel(channel) {
+                try {
+                    const response = await fetch(channel.url, { method: 'HEAD', timeout: 5000 });
+                    channel.status = response.ok ? 'working' : 'failed';
+                } catch (error) {
+                    channel.status = 'failed';
+                }
+            }
+
+            displayChannels() {
+                const channelsList = document.getElementById('channels-list');
+                channelsList.innerHTML = '';
+
+                const filteredChannels = this.channels.filter(channel => {
+                    if (this.currentFilter === 'all') return true;
+                    return channel.status === this.currentFilter;
+                });
+
+                filteredChannels.forEach((channel, index) => {
+                    const channelElement = document.createElement('div');
+                    channelElement.className = 'channel-item';
+                    channelElement.innerHTML = `
+                        <div>
+                            <strong>${channel.title || 'Untitled Channel'}</strong>
+                        </div>
+                        <div>
+                            <span class="status-badge status-${channel.status}">
+                                ${channel.status.toUpperCase()}
+                            </span>
+                        </div>
+                    `;
+
+                    channelElement.addEventListener('click', () => {
+                        this.playChannel(channel);
+                    });
+
+                    channelsList.appendChild(channelElement);
+                });
+            }
+
+            playChannel(channel) {
+                const videoPlayer = document.getElementById('video-player');
+                videoPlayer.src = channel.url;
+                videoPlayer.play().catch(error => {
+                    console.error('Error playing channel:', error);
+                    alert('Error playing channel. The stream might be unavailable or unsupported.');
+                });
+            }
+
+            updateStats() {
+                const total = this.channels.length;
+                const working = this.channels.filter(c => c.status === 'working').length;
+                const failed = this.channels.filter(c => c.status === 'failed').length;
+
+                document.getElementById('total-channels').textContent = total;
+                document.getElementById('working-channels').textContent = working;
+                document.getElementById('failed-channels').textContent = failed;
+            }
+        }
+
+        const checker = new PlaylistChecker();
+
+        function checkPlaylist() {
+            checker.checkPlaylist();
+        }
+    </script>
+</body>
+</html>
+
