@@ -86,21 +86,21 @@
       border-bottom: none;
     }
     .footer {
-            text-align: center;
-            margin-top: 10px;
-            padding: 15px;
-            background-color: #ff5a60;
-            color: white;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .footer a {
-            color: white;
-            text-decoration: none;
-        }
-        .footer a:hover {
-            text-decoration: underline;
-        }
+      text-align: center;
+      margin-top: 10px;
+      padding: 15px;
+      background-color: #ff5a60;
+      color: white;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .footer a {
+      color: white;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
     @media (max-width: 768px) {
       #player-container {
         width: 95%;
@@ -118,7 +118,6 @@
   </style>
 </head>
 <body>
-
 <div id="player-container">
   <h1>Live TV Player</h1>
   <video id="live-tv-player" class="video-js vjs-default-skin" controls preload="auto" data-setup='{"fluid": true}'>
@@ -126,36 +125,39 @@
     Your browser does not support the video tag.
   </video>
   
-  <!-- Search bar -->
   <div class="search-bar">
     <input type="text" id="search-input" placeholder="Search channels..." onkeyup="filterChannels()">
     <button onclick="filterChannels()">Search</button>
   </div>
 
-  <!-- Channel list -->
-  <div class="channel-list" id="channel-list">
-    <!-- Channels will load dynamically -->
-  </div>
+  <div class="channel-list" id="channel-list"></div>
 </div>
 
-<!-- Footer -->
 <div class="footer">
-                <a href="about.me.html" target="_blank">Visit for more updates</a>
-            </div>
+  <a href="about.me.html" target="_blank">Visit for more updates</a>
+</div>
 
 <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls/dist/videojs-contrib-hls.min.js"></script>
 <script>
   const m3uLink = 'https://m3u.ch/pl/eb7353c3bab76a0cb6f1cb26de322332_fee60ab67cca804d148f4ef3a25487a7.m3u';
 
-  // Initialize Video.js player
   const player = videojs('live-tv-player', {
     techOrder: ['html5', 'hls'],
     preload: 'auto',
-    controls: true
+    controls: true,
+    liveui: true
   });
 
-  // Fetch and parse the .m3u playlist
+  player.ready(function () {
+    this.hls = {
+      enableLowInitialPlaylist: true,
+      bandwidth: 500000,
+      bufferTime: 0.5,
+      maxBufferLength: 30
+    };
+  });
+
   async function loadChannels() {
     try {
       const response = await fetch(m3uLink);
@@ -182,7 +184,6 @@
     }
   }
 
-  // Render channels dynamically
   function renderChannels(channels) {
     const channelList = document.getElementById('channel-list');
     channelList.innerHTML = '';
@@ -198,7 +199,6 @@
     });
   }
 
-  // Filter channels
   function filterChannels() {
     const searchInput = document.getElementById('search-input').value.toLowerCase();
     const items = document.querySelectorAll('.channel-item');
@@ -208,17 +208,12 @@
     });
   }
 
-  // Play a selected channel
   function playChannel(url) {
     player.src({ src: url, type: 'application/x-mpegURL' });
     player.play();
   }
 
-  // Load channels on page load
   window.onload = loadChannels;
 </script>
-
 </body>
 </html>
-
-
