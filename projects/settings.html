@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Settings</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .settings-container {
+      background-color: #1e1e1e;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+    .back-icon {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      cursor: pointer;
+      font-size: 24px;
+      color: #fff;
+      background: #333;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .back-icon:hover {
+      background: #555;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #ff5a60;
+    }
+    .settings-group {
+      margin-bottom: 20px;
+    }
+    .settings-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+    .settings-group select, 
+    .settings-group input[type="checkbox"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #ff5a60;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background-color: #ff4248;
+    }
+    .info-text {
+      color: #888;
+      font-size: 0.8em;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-icon">
+    <i class="ri-arrow-left-line"></i>
+  </a>
+  <div class="settings-container">
+    <h1>Player Settings</h1>
+    <form id="playerSettingsForm">
+      <div class="settings-group">
+        <label>
+          <input type="checkbox" id="videojsCheckbox" name="videojs"> 
+          Enable Video.js Player
+        </label>
+        <p class="info-text">Default is HTML5 native player</p>
+      </div>
+
+      <div class="settings-group">
+        <label for="preloadSelect">Preload Setting:</label>
+        <select id="preloadSelect" name="preload">
+          <option value="auto">Auto</option>
+          <option value="metadata">Metadata</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div class="settings-group">
+        <label>
+          <input type="checkbox" id="controlsCheckbox" name="controls"> 
+          Show Player Controls
+        </label>
+      </div>
+
+      <button type="submit" class="btn">Save Settings</button>
+    </form>
+  </div>
+
+  <script>
+    // Load existing settings on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const playerConfig = JSON.parse(localStorage.getItem('playerConfig')) || {
+        tech: 'html5',
+        preload: 'auto',
+        controls: true,
+        videojs: false
+      };
+
+      document.getElementById('preloadSelect').value = playerConfig.preload;
+      document.getElementById('controlsCheckbox').checked = playerConfig.controls;
+      document.getElementById('videojsCheckbox').checked = playerConfig.videojs;
+    });
+
+    // Handle form submission
+    document.getElementById('playerSettingsForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const playerConfig = {
+        tech: 'html5', // Always HTML5 as base
+        preload: document.getElementById('preloadSelect').value,
+        controls: document.getElementById('controlsCheckbox').checked,
+        videojs: document.getElementById('videojsCheckbox').checked
+      };
+
+      // Save to localStorage
+      localStorage.setItem('playerConfig', JSON.stringify(playerConfig));
+
+      // Redirect to main page
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
