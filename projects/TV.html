@@ -34,8 +34,19 @@
 
         @media (max-width: 854px) {
             .player-container {
-                width: 100vw;
-                height: 56.25vw;
+                width: 100%;
+                height: 100vh;
+                max-height: -webkit-fill-available;
+            }
+            
+            .channel-panel {
+                width: 80%;
+                left: -80%;
+            }
+            
+            .channel-item {
+                padding: 10px;
+                font-size: 14px;
             }
         }
 
@@ -113,6 +124,9 @@
             flex: 1;
             overflow-y: auto;
             padding: 10px;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            touch-action: pan-y;
         }
 
         .channel-item {
@@ -590,4 +604,3 @@
     </script>
 </body>
 </html>
-
