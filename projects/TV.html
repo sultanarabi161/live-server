@@ -45,6 +45,29 @@
             object-fit: contain;
         }
 
+        .menu-btn {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 11;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            padding: 6px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0;
+        }
+
+        .menu-btn .material-icons {
+            font-size: 18px;
+        }
+
+        .menu-btn:hover {
+            background: #e50914;
+        }
+
         .channel-panel {
             position: absolute;
             top: 0;
@@ -54,14 +77,40 @@
             background: rgba(0, 0, 0, 0.95);
             transition: left 0.3s ease;
             z-index: 10;
+            display: flex;
+            flex-direction: column;
         }
 
         .channel-panel.show {
             left: 0;
         }
 
+        .search-box {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         .channels-container {
-            height: 100%;
+            flex: 1;
             overflow-y: auto;
             padding: 10px;
         }
@@ -83,9 +132,54 @@
             background: #e50914;
         }
 
+        .channel-number {
+            min-width: 24px;
+            text-align: center;
+            margin-right: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+
         .channel-item .material-icons {
             font-size: 16px;
             margin-right: 6px;
+        }
+
+        .channel-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .change-channel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 15px 10px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s;
+            z-index: 9;
+        }
+
+        .prev-channel {
+            left: 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .next-channel {
+            right: 0;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .change-channel-btn:hover {
+            background: rgba(229, 9, 20, 0.8);
         }
 
         .player-controls {
@@ -120,53 +214,6 @@
 
         .control-btn .material-icons {
             font-size: 24px;
-        }
-
-        .menu-btn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 11;
-            background: rgba(0, 0, 0, 0.7);
-            border: none;
-            color: white;
-            padding: 8px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s;
-            opacity: 0;
-        }
-
-        .menu-btn:hover {
-            background: #e50914;
-        }
-
-        .change-channel-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            padding: 15px 10px;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.3s, background 0.3s;
-            z-index: 9;
-        }
-
-        .prev-channel {
-            left: 0;
-            border-radius: 0 4px 4px 0;
-        }
-
-        .next-channel {
-            right: 0;
-            border-radius: 4px 0 0 4px;
-        }
-
-        .change-channel-btn:hover {
-            background: rgba(229, 9, 20, 0.8);
         }
 
         .volume-control {
@@ -260,6 +307,9 @@
         </button>
 
         <div class="channel-panel">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Search channels..." id="channelSearch">
+            </div>
             <div class="channels-container">
                 <!-- Channels will be populated here -->
             </div>
@@ -320,6 +370,7 @@
                 this.prevChannelBtn = document.querySelector('.prev-channel');
                 this.nextChannelBtn = document.querySelector('.next-channel');
                 this.controlElements = document.querySelectorAll('.player-controls, .menu-btn, .change-channel-btn, .channel-info');
+                this.channelSearch = document.getElementById('channelSearch');
             }
 
             setupEventListeners() {
@@ -330,6 +381,7 @@
                 this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
                 this.prevChannelBtn.addEventListener('click', () => this.changeChannel('prev'));
                 this.nextChannelBtn.addEventListener('click', () => this.changeChannel('next'));
+                this.channelSearch.addEventListener('input', () => this.searchChannels());
 
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
@@ -410,18 +462,31 @@
                 this.renderChannels();
             }
 
+            searchChannels() {
+                const searchTerm = this.channelSearch.value.toLowerCase();
+                const channelItems = this.channelsContainer.querySelectorAll('.channel-item');
+                
+                channelItems.forEach(item => {
+                    const channelName = item.querySelector('.channel-name').textContent.toLowerCase();
+                    const channelNumber = item.querySelector('.channel-number').textContent;
+                    const matches = channelName.includes(searchTerm) || channelNumber.includes(searchTerm);
+                    item.style.display = matches ? 'flex' : 'none';
+                });
+            }
+
             renderChannels() {
-                this.channelsContainer.innerHTML = this.channels.map(channel => `
+                this.channelsContainer.innerHTML = this.channels.map((channel, index) => `
                     <div class="channel-item" data-url="${channel.url}">
+                        <span class="channel-number">${index + 1}</span>
                         <span class="material-icons">tv</span>
-                        <span>${channel.title}</span>
+                        <span class="channel-name">${channel.title}</span>
                     </div>
                 `).join('');
 
                 this.channelsContainer.querySelectorAll('.channel-item').forEach(item => {
                     item.addEventListener('click', () => {
                         const url = item.dataset.url;
-                        const name = item.querySelector('span:last-child').textContent;
+                        const name = item.querySelector('.channel-name').textContent;
                         this.playChannel(url, name);
                     });
                 });
