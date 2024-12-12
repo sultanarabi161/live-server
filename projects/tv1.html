@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart TV Player</title>
+    <title>Universal Smart TV Player</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #e50914;
+            --focus-outline: 2px solid #e50914;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,199 +18,148 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        :root {
-            --primary-color: #e50914;
-            --bg-dark: #000000;
-            --text-light: #ffffff;
-            --menu-bg: rgba(0, 0, 0, 0.95);
-            --menu-width: 300px;
-            --menu-padding: 15px;
-        }
-
         body {
-            background: var(--bg-dark);
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             font-family: 'Roboto', sans-serif;
             overflow: hidden;
-            color: var(--text-light);
-            height: 100vh;
+        }
+
+        .player-container {
             width: 100vw;
-            position: fixed;
-        }
-
-        .player-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-        }
-
-        .video-container {
-            width: 100%;
-            height: 100%;
+            height: 100vh;
             position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+
+        /* Desktop specific */
+        @media only screen and (min-width: 1024px) {
+            .player-container {
+                aspect-ratio: 16/9;
+                max-height: 100vh;
+                max-width: 100vw;
+            }
+        }
+
+        /* Android TV specific */
+        @media only screen and (min-width: 960px) and (orientation: landscape) {
+            .player-container {
+                width: 100vw;
+                height: 100vh;
+            }
+        }
+
+        /* Mobile in desktop mode */
+        @media only screen and (max-width: 959px) {
+            body {
+                overflow: auto;
+            }
+            
+            .player-container {
+                aspect-ratio: 16/9;
+                width: 100vw;
+                height: auto;
+            }
         }
 
         #videoPlayer {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            background: var(--bg-dark);
         }
 
-        /* Menu Toggle Button */
-        .menu-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
+        .menu-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 11;
             background: rgba(0, 0, 0, 0.7);
             border: none;
-            color: var(--text-light);
-            width: 40px;
-            height: 40px;
+            color: white;
+            padding: 12px;
             border-radius: 50%;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            opacity: 0;
+            min-width: 48px;
+            min-height: 48px;
         }
 
-        .menu-toggle:hover {
-            background: var(--primary-color);
+        .menu-btn:focus {
+            outline: var(--focus-outline);
         }
 
-        .menu-toggle .material-icons {
+        .menu-btn .material-icons {
             font-size: 24px;
         }
 
-        /* Side Menu */
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: -300px;
-            width: var(--menu-width);
-            height: 100%;
-            background: var(--menu-bg);
-            z-index: 999;
-            transition: left 0.3s ease;
-            backdrop-filter: blur(10px);
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-        }
-
-        .side-menu.active {
-            left: 0;
-        }
-
-        .menu-header {
-            padding: var(--menu-padding);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .menu-title {
-            font-size: 18px;
-            font-weight: 500;
-        }
-
-        .close-menu {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .close-menu:hover {
-            color: var(--primary-color);
-        }
-
-        /* Menu Items */
-        .menu-items {
-            padding: var(--menu-padding);
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            color: var(--text-light);
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .menu-item:hover,
-        .menu-item.active {
+        .menu-btn:hover {
             background: var(--primary-color);
         }
 
-        .menu-item .material-icons {
-            margin-right: 10px;
-            font-size: 20px;
-        }
-
-        /* Channel List */
-        .channel-list {
-            position: fixed;
+        .channel-panel {
+            position: absolute;
             top: 0;
-            left: -300px;
-            width: var(--menu-width);
+            left: -320px;
+            width: 320px;
             height: 100%;
-            background: var(--menu-bg);
-            z-index: 998;
+            background: rgba(0, 0, 0, 0.95);
             transition: left 0.3s ease;
+            z-index: 10;
             display: flex;
             flex-direction: column;
         }
 
-        .channel-list.active {
+        .channel-panel.show {
             left: 0;
         }
-        
-        /* Channel List Styles */
+
         .search-box {
-            padding: var(--menu-padding);
-            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .search-input {
             width: 100%;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
             border-radius: 4px;
-            color: var(--text-light);
-            font-size: 14px;
+            color: white;
+            font-size: 16px;
         }
 
         .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
+            outline: var(--focus-outline);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .channels-container {
             flex: 1;
             overflow-y: auto;
-            padding: var(--menu-padding);
+            padding: 16px;
         }
 
         .channel-item {
             display: flex;
             align-items: center;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
+            padding: 12px 16px;
+            color: white;
             cursor: pointer;
-            transition: all 0.2s ease;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .channel-item:focus {
+            outline: var(--focus-outline);
+            background: rgba(229, 9, 20, 0.8);
         }
 
         .channel-item:hover,
@@ -214,56 +168,71 @@
         }
 
         .channel-number {
-            min-width: 30px;
+            min-width: 32px;
             text-align: center;
+            margin-right: 12px;
             background: rgba(255, 255, 255, 0.2);
-            padding: 3px 6px;
+            padding: 4px 8px;
             border-radius: 3px;
             font-size: 12px;
-            margin-right: 10px;
         }
 
-        .channel-icon {
-            margin-right: 10px;
+        .channel-item .material-icons {
+            font-size: 20px;
+            margin-right: 8px;
         }
 
         .channel-name {
             flex: 1;
-            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .favorite-btn {
-            background: none;
+        .change-channel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
             border: none;
-            color: var(--text-light);
+            padding: 20px 16px;
             cursor: pointer;
-            padding: 5px;
-            opacity: 0.7;
-            transition: all 0.2s;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s;
+            z-index: 9;
+            min-width: 48px;
+            min-height: 48px;
         }
 
-        .favorite-btn:hover {
-            opacity: 1;
+        .change-channel-btn:focus {
+            outline: var(--focus-outline);
         }
 
-        .favorite-btn.active {
-            color: #ffd700;
-            opacity: 1;
+        .prev-channel {
+            left: 0;
+            border-radius: 0 4px 4px 0;
         }
 
-        /* Player Controls */
+        .next-channel {
+            right: 0;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .change-channel-btn:hover {
+            background: rgba(229, 9, 20, 0.8);
+        }
+
         .player-controls {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 20px;
             background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            padding: 24px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -271,66 +240,79 @@
         .control-btn {
             background: none;
             border: none;
-            color: var(--text-light);
+            color: white;
             cursor: pointer;
-            width: 40px;
-            height: 40px;
+            padding: 12px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            min-width: 48px;
+            min-height: 48px;
+        }
+
+        .control-btn:focus {
+            outline: var(--focus-outline);
         }
 
         .control-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .control-btn .material-icons {
+            font-size: 28px;
         }
 
         .volume-control {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 16px;
             min-width: 120px;
         }
 
-        .volume-slider {
+        input[type="range"] {
+            -webkit-appearance: none;
             width: 100%;
             height: 4px;
-            -webkit-appearance: none;
             background: rgba(255,255,255,0.3);
             border-radius: 2px;
-            outline: none;
+            cursor: pointer;
         }
 
-        .volume-slider::-webkit-slider-thumb {
+        input[type="range"]:focus {
+            outline: var(--focus-outline);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             background: var(--primary-color);
             border-radius: 50%;
             cursor: pointer;
         }
 
-        /* Channel Info */
         .channel-info {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            padding: 10px 15px;
+            top: 16px;
+            right: 16px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 16px;
             border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            z-index: 9;
             opacity: 0;
             transition: opacity 0.3s;
         }
 
-        /* Loading Spinner */
         .loading-spinner {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border: 4px solid rgba(255,255,255,0.3);
             border-top: 4px solid var(--primary-color);
             border-radius: 50%;
@@ -343,210 +325,234 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        /* Show controls on hover */
-        .video-container:hover .player-controls,
-        .video-container:hover .channel-info {
+        .player-container:hover .change-channel-btn,
+        .player-container:hover .player-controls,
+        .player-container:hover .menu-btn,
+        .player-container:hover .channel-info {
             opacity: 1;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .side-menu,
-            .channel-list {
-                width: 280px;
+        .hide-controls {
+            opacity: 0 !important;
+        }
+
+        .channels-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .channels-container::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .channels-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        /* TV Focus Styles */
+        @media (hover: none) {
+            .channel-item:focus,
+            .control-btn:focus,
+            .menu-btn:focus {
+                outline: 3px solid var(--primary-color);
+                background: rgba(229, 9, 20, 0.8);
             }
         }
     </style>
 </head>
 <body>
-    <div class="player-wrapper">
-        <div class="video-container">
-            <video id="videoPlayer"></video>
-            
-            <!-- Menu Toggle Button -->
-            <button class="menu-toggle" id="menuToggle">
-                <span class="material-icons">menu</span>
+    <div class="player-container">
+        <video id="videoPlayer"></video>
+        
+        <button class="menu-btn">
+            <span class="material-icons">menu</span>
+        </button>
+
+        <div class="channel-panel">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Search channels..." id="channelSearch">
+            </div>
+            <div class="channels-container">
+                <!-- Channels will be populated here -->
+            </div>
+        </div>
+
+        <button class="change-channel-btn prev-channel">
+            <span class="material-icons">chevron_left</span>
+        </button>
+        <button class="change-channel-btn next-channel">
+            <span class="material-icons">chevron_right</span>
+        </button>
+
+        <div class="channel-info">
+            <span id="currentChannel">Select a channel</span>
+        </div>
+
+        <div class="loading-spinner"></div>
+
+        <div class="player-controls">
+            <button class="control-btn" id="playPauseBtn">
+                <span class="material-icons">play_arrow</span>
             </button>
-
-            <!-- Side Menu -->
-            <div class="side-menu" id="sideMenu">
-                <div class="menu-header">
-                    <h3 class="menu-title">Menu</h3>
-                    <button class="close-menu" id="closeMenu">
-                        <span class="material-icons">close</span>
-                    </button>
-                </div>
-                <div class="menu-items">
-                    <div class="menu-item" data-action="channels">
-                        <span class="material-icons">tv</span>
-                        <span>Channels</span>
-                    </div>
-                    <div class="menu-item" data-action="favorites">
-                        <span class="material-icons">star</span>
-                        <span>Favorites</span>
-                    </div>
-                    <div class="menu-item" data-action="settings">
-                        <span class="material-icons">settings</span>
-                        <span>Settings</span>
-                    </div>
-                    <div class="menu-item" data-action="about">
-                        <span class="material-icons">info</span>
-                        <span>About</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Channel List -->
-            <div class="channel-list" id="channelList">
-                <div class="menu-header">
-                    <h3 class="menu-title">Channels</h3>
-                    <button class="close-menu" id="closeChannels">
-                        <span class="material-icons">close</span>
-                    </button>
-                </div>
-                <div class="search-box">
-                    <input type="text" class="search-input" placeholder="Search channels..." id="searchChannel">
-                </div>
-                <div class="channels-container" id="channelsContainer">
-                    <!-- Channels will be populated here -->
-                </div>
-            </div>
-            
-            <!-- Player Controls -->
-            <div class="player-controls" id="playerControls">
-                <button class="control-btn" id="playPauseBtn">
-                    <span class="material-icons">play_arrow</span>
+            <div class="volume-control">
+                <button class="control-btn" id="muteBtn">
+                    <span class="material-icons">volume_up</span>
                 </button>
-                <div class="volume-control">
-                    <button class="control-btn" id="muteBtn">
-                        <span class="material-icons">volume_up</span>
-                    </button>
-                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100">
-                </div>
-                <button class="control-btn" id="fullscreenBtn">
-                    <span class="material-icons">fullscreen</span>
-                </button>
+                <input type="range" id="volumeSlider" min="0" max="100" value="100">
             </div>
-
-            <!-- Channel Info -->
-            <div class="channel-info" id="channelInfo">
-                <span id="currentChannel">Select a channel</span>
-            </div>
-
-            <!-- Loading Spinner -->
-            <div class="loading-spinner" id="loadingSpinner"></div>
+            <button class="control-btn" id="fullscreenBtn">
+                <span class="material-icons">fullscreen</span>
+            </button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        class SmartTVPlayer {
+        class TVPlayer {
             constructor() {
-                this.initializeVariables();
                 this.initializeElements();
                 this.setupEventListeners();
                 this.loadChannels();
-            }
-
-            initializeVariables() {
                 this.currentChannelIndex = 0;
                 this.channels = [];
-                this.favorites = this.loadFavorites();
-                this.isPlaying = false;
-                this.isMuted = false;
                 this.hideControlsTimeout = null;
+                this.setupTVSupport();
             }
 
             initializeElements() {
-                // Video and container elements
                 this.videoPlayer = document.getElementById('videoPlayer');
-                this.playerControls = document.getElementById('playerControls');
-                this.channelInfo = document.getElementById('channelInfo');
+                this.menuBtn = document.querySelector('.menu-btn');
+                this.channelPanel = document.querySelector('.channel-panel');
+                this.channelsContainer = document.querySelector('.channels-container');
                 this.currentChannelDisplay = document.getElementById('currentChannel');
-                this.loadingSpinner = document.getElementById('loadingSpinner');
-
-                // Menu elements
-                this.menuToggle = document.getElementById('menuToggle');
-                this.sideMenu = document.getElementById('sideMenu');
-                this.closeMenu = document.getElementById('closeMenu');
-                this.channelList = document.getElementById('channelList');
-                this.closeChannels = document.getElementById('closeChannels');
-                this.channelsContainer = document.getElementById('channelsContainer');
-                this.searchInput = document.getElementById('searchChannel');
-
-                // Control elements
+                this.loadingSpinner = document.querySelector('.loading-spinner');
                 this.playPauseBtn = document.getElementById('playPauseBtn');
                 this.muteBtn = document.getElementById('muteBtn');
                 this.volumeSlider = document.getElementById('volumeSlider');
                 this.fullscreenBtn = document.getElementById('fullscreenBtn');
+                this.prevChannelBtn = document.querySelector('.prev-channel');
+                this.nextChannelBtn = document.querySelector('.next-channel');
+                this.controlElements = document.querySelectorAll('.player-controls, .menu-btn, .change-channel-btn, .channel-info');
+                this.channelSearch = document.getElementById('channelSearch');
             }
 
-            setupEventListeners() {
-                // Menu events
-                this.menuToggle.addEventListener('click', () => this.toggleMenu());
-                this.closeMenu.addEventListener('click', () => this.closeMenu());
-                this.closeChannels.addEventListener('click', () => this.closeChannels());
+            setupTVSupport() {
+                const isTVBrowser = /\b(TV|SmartTV|SMART-TV|GoogleTV|AppleTV|Android TV)\b/.test(navigator.userAgent);
                 
-                // Menu item events
-                document.querySelectorAll('.menu-item').forEach(item => {
-                    item.addEventListener('click', (e) => this.handleMenuAction(e.currentTarget.dataset.action));
-                });
-
-                // Search event
-                this.searchInput.addEventListener('input', () => this.searchChannels());
-
-                // Player control events
-                this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
-                this.muteBtn.addEventListener('click', () => this.toggleMute());
-                this.volumeSlider.addEventListener('input', (e) => this.changeVolume(e.target.value));
-                this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
-
-                // Video player events
-                this.videoPlayer.addEventListener('play', () => this.onVideoPlay());
-                this.videoPlayer.addEventListener('pause', () => this.onVideoPause());
-                this.videoPlayer.addEventListener('waiting', () => this.showLoading());
-                this.videoPlayer.addEventListener('playing', () => this.hideLoading());
-
-                // Keyboard events
-                document.addEventListener('keydown', (e) => this.handleKeyPress(e));
-
-                // Auto-hide controls
-                this.setupAutoHideControls();
-            }
-
-            toggleMenu() {
-                this.sideMenu.classList.toggle('active');
-                this.channelList.classList.remove('active');
-            }
-
-            closeMenu() {
-                this.sideMenu.classList.remove('active');
-            }
-
-            closeChannels() {
-                this.channelList.classList.remove('active');
-            }
-
-            handleMenuAction(action) {
-                switch(action) {
-                    case 'channels':
-                        this.showChannelList();
-                        break;
-                    case 'favorites':
-                        this.showFavorites();
-                        break;
-                    case 'settings':
-                        this.showSettings();
-                        break;
-                    case 'about':
-                        this.showAbout();
-                        break;
+                if (isTVBrowser) {
+                    document.documentElement.style.setProperty('--focus-outline', '3px solid #e50914');
+                    
+                    document.querySelectorAll('.control-btn, .channel-item').forEach(el => {
+                        el.style.minWidth = '48px';
+                        el.style.minHeight = '48px';
+                    });
                 }
             }
 
-            showChannelList() {
-                this.sideMenu.classList.remove('active');
-                this.channelList.classList.add('active');
+            setupEventListeners() {
+                this.setupNavigationControls();
+                this.setupTouchControls();
+                this.setupAutoHide();
+                this.setupBasicControls();
+            }
+
+            setupNavigationControls() {
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case 'ArrowUp':
+                            this.navigateChannelList('up');
+                            break;
+                        case 'ArrowDown':
+                            this.navigateChannelList('down');
+                            break;
+                        case 'ArrowLeft':
+                            this.changeChannel('prev');
+                            break;
+                        case 'ArrowRight':
+                            this.changeChannel('next');
+                            break;
+                        case 'Enter':
+                            this.selectCurrentChannel();
+                            break;
+                        case 'Escape':
+                            this.closeChannelPanel();
+                            break;
+                    }
+                });
+            }
+
+            setupTouchControls() {
+                let touchStartX = 0;
+                let touchStartY = 0;
+
+                this.videoPlayer.addEventListener('touchstart', (e) => {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                });
+
+                this.videoPlayer.addEventListener('touchend', (e) => {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const deltaX = touchEndX - touchStartX;
+                    const deltaY = touchEndY - touchStartY;
+
+                    if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 30) {
+                        if (deltaX > 0) {
+                            this.changeChannel('next');
+                        } else {
+                            this.changeChannel('prev');
+                        }
+                    }
+
+                    if (Math.abs(deltaY) > 50 && Math.abs(deltaX) < 30) {
+                        const volumeChange = deltaY > 0 ? -0.1 : 0.1;
+                        this.videoPlayer.volume = Math.max(0, Math.min(1, this.videoPlayer.volume + volumeChange));
+                        this.volumeSlider.value = this.videoPlayer.volume * 100;
+                    }
+                });
+            }
+
+            setupBasicControls() {
+                this.menuBtn.addEventListener('click', () => this.toggleChannelPanel());
+                this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
+                this.muteBtn.addEventListener('click', () => this.toggleMute());
+                this.volumeSlider.addEventListener('input', (e) => this.changeVolume(e));
+                this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+                this.prevChannelBtn.addEventListener('click', () => this.changeChannel('prev'));
+                this.nextChannelBtn.addEventListener('click', () => this.changeChannel('next'));
+                this.channelSearch.addEventListener('input', () => this.searchChannels());
+
+                this.videoPlayer.addEventListener('waiting', () => this.showLoading());
+                this.videoPlayer.addEventListener('playing', () => this.hideLoading());
+
+                document.addEventListener('click', (e) => {
+                    if (!this.channelPanel.contains(e.target) && 
+                        !this.menuBtn.contains(e.target) &&
+                        this.channelPanel.classList.contains('show')) {
+                        this.toggleChannelPanel();
+                    }
+                });
+            }
+
+            setupAutoHide() {
+                const showControls = () => {
+                    this.controlElements.forEach(el => el.classList.remove('hide-controls'));
+                    if (this.hideControlsTimeout) {
+                        clearTimeout(this.hideControlsTimeout);
+                    }
+                    this.hideControlsTimeout = setTimeout(() => {
+                        if (!this.videoPlayer.paused && !this.channelPanel.classList.contains('show')) {
+                            this.controlElements.forEach(el => el.classList.add('hide-controls'));
+                        }
+                    }, 4000);
+                };
+
+                this.videoPlayer.parentElement.addEventListener('mousemove', showControls);
+                this.videoPlayer.parentElement.addEventListener('touchstart', showControls);
+                this.videoPlayer.addEventListener('pause', () => {
+                    this.controlElements.forEach(el => el.classList.remove('hide-controls'));
+                });
+                this.videoPlayer.addEventListener('play', showControls);
             }
 
             async loadChannels() {
@@ -556,7 +562,7 @@
                     this.parseM3U(m3uText);
                 } catch (error) {
                     console.error('Error loading channels:', error);
-                    this.showError('Failed to load channels');
+                    this.currentChannelDisplay.textContent = 'Error loading channels';
                 }
             }
 
@@ -581,166 +587,160 @@
 
                 this.renderChannels();
             }
-            
+
             renderChannels() {
                 this.channelsContainer.innerHTML = this.channels.map((channel, index) => `
-                    <div class="channel-item" data-index="${index}">
+                    <div class="channel-item" tabindex="0" data-url="${channel.url}">
                         <span class="channel-number">${index + 1}</span>
-                        <span class="material-icons channel-icon">tv</span>
+                        <span class="material-icons">tv</span>
                         <span class="channel-name">${channel.title}</span>
-                        <button class="favorite-btn ${this.favorites.includes(index) ? 'active' : ''}" data-index="${index}">
-                            <span class="material-icons">star</span>
-                        </button>
                     </div>
                 `).join('');
 
-                // Add click events to channel items
                 this.channelsContainer.querySelectorAll('.channel-item').forEach(item => {
                     item.addEventListener('click', () => {
-                        const index = parseInt(item.dataset.index);
-                        this.playChannel(index);
+                        const url = item.dataset.url;
+                        const name = item.querySelector('.channel-name').textContent;
+                        this.playChannel(url, name);
                     });
-                });
 
-                // Add click events to favorite buttons
-                this.channelsContainer.querySelectorAll('.favorite-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const index = parseInt(btn.dataset.index);
-                        this.toggleFavorite(index);
+                    item.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            const url = item.dataset.url;
+                            const name = item.querySelector('.channel-name').textContent;
+                            this.playChannel(url, name);
+                        }
                     });
                 });
             }
 
-            playChannel(index) {
-                if (index >= 0 && index < this.channels.length) {
-                    const channel = this.channels[index];
-                    this.currentChannelIndex = index;
-                    this.showLoading();
-                    this.currentChannelDisplay.textContent = channel.title;
+            navigateChannelList(direction) {
+                const items = Array.from(this.channelsContainer.querySelectorAll('.channel-item:not([style*="display: none"])'));
+                const currentIndex = items.findIndex(item => item === document.activeElement);
+                let nextIndex;
 
-                    if (Hls.isSupported()) {
-                        if (this.hls) {
-                            this.hls.destroy();
-                        }
-                        this.hls = new Hls();
-                        this.hls.loadSource(channel.url);
-                        this.hls.attachMedia(this.videoPlayer);
-                        this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                            this.videoPlayer.play()
-                                .then(() => {
-                                    this.hideLoading();
-                                    this.closeChannels();
-                                })
-                                .catch(error => {
-                                    console.error('Playback failed:', error);
-                                    this.showError('Playback failed');
-                                });
-                        });
-                    } else if (this.videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                        this.videoPlayer.src = channel.url;
-                        this.videoPlayer.play()
-                            .then(() => {
-                                this.hideLoading();
-                                this.closeChannels();
-                            })
-                            .catch(error => {
-                                console.error('Playback failed:', error);
-                                this.showError('Playback failed');
-                            });
-                    }
+                if (direction === 'up') {
+                    nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+                } else {
+                    nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+                }
 
-                    this.updateActiveChannel();
+                items[nextIndex].focus();
+                items[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            selectCurrentChannel() {
+                const focusedChannel = document.activeElement;
+                if (focusedChannel.classList.contains('channel-item')) {
+                    const url = focusedChannel.dataset.url;
+                    const name = focusedChannel.querySelector('.channel-name').textContent;
+                    this.playChannel(url, name);
                 }
             }
 
             searchChannels() {
-                const searchTerm = this.searchInput.value.toLowerCase();
+                const searchTerm = this.channelSearch.value.toLowerCase();
                 const channelItems = this.channelsContainer.querySelectorAll('.channel-item');
                 
                 channelItems.forEach(item => {
                     const channelName = item.querySelector('.channel-name').textContent.toLowerCase();
-                    if (channelName.includes(searchTerm)) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
-                    }
+                    const channelNumber = item.querySelector('.channel-number').textContent;
+                    const matches = channelName.includes(searchTerm) || channelNumber.includes(searchTerm);
+                    item.style.display = matches ? 'flex' : 'none';
                 });
             }
 
-            toggleFavorite(index) {
-                const favoriteIndex = this.favorites.indexOf(index);
-                if (favoriteIndex === -1) {
-                    this.favorites.push(index);
+            changeChannel(direction) {
+                if (this.channels.length === 0) return;
+
+                if (direction === 'next') {
+                    this.currentChannelIndex = (this.currentChannelIndex + 1) % this.channels.length;
                 } else {
-                    this.favorites.splice(favoriteIndex, 1);
+                    this.currentChannelIndex = (this.currentChannelIndex - 1 + this.channels.length) % this.channels.length;
                 }
-                this.saveFavorites();
-                this.renderChannels();
+
+                const channel = this.channels[this.currentChannelIndex];
+                this.playChannel(channel.url, channel.title);
             }
 
-            loadFavorites() {
-                const savedFavorites = localStorage.getItem('favorites');
-                return savedFavorites ? JSON.parse(savedFavorites) : [];
-            }
+            playChannel(url, name) {
+                this.showLoading();
+                this.currentChannelIndex = this.channels.findIndex(channel => channel.url === url);
+                this.currentChannelDisplay.textContent = name;
 
-            saveFavorites() {
-                localStorage.setItem('favorites', JSON.stringify(this.favorites));
-            }
-
-            showFavorites() {
-                const channelItems = this.channelsContainer.querySelectorAll('.channel-item');
-                channelItems.forEach(item => {
-                    const index = parseInt(item.dataset.index);
-                    if (this.favorites.includes(index)) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
+                this.channelsContainer.querySelectorAll('.channel-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.url === url) {
+                        item.classList.add('active');
                     }
                 });
-                this.showChannelList();
+
+                if (Hls.isSupported()) {
+                    if (this.hls) {
+                        this.hls.destroy();
+                    }
+                    this.hls = new Hls();
+                    this.hls.loadSource(url);
+                    this.hls.attachMedia(this.videoPlayer);
+                    this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        this.videoPlayer.play().catch(() => {
+                            console.log('Playback failed, trying again...');
+                        });
+                    });
+                } else if (this.videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                    this.videoPlayer.src = url;
+                    this.videoPlayer.play().catch(() => {
+                        console.log('Playback failed, trying again...');
+                    });
+                }
+
+                this.channelPanel.classList.remove('show');
             }
 
-            // Player Controls
+            toggleChannelPanel() {
+                this.channelPanel.classList.toggle('show');
+                if (this.channelPanel.classList.contains('show')) {
+                    this.channelSearch.focus();
+                }
+            }
+
+            closeChannelPanel() {
+                this.channelPanel.classList.remove('show');
+            }
+
             togglePlayPause() {
                 if (this.videoPlayer.paused) {
                     this.videoPlayer.play();
+                    this.playPauseBtn.innerHTML = '<span class="material-icons">pause</span>';
                 } else {
                     this.videoPlayer.pause();
+                    this.playPauseBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
                 }
             }
 
             toggleMute() {
                 this.videoPlayer.muted = !this.videoPlayer.muted;
-                this.muteBtn.querySelector('.material-icons').textContent = 
-                    this.videoPlayer.muted ? 'volume_off' : 'volume_up';
+                this.muteBtn.innerHTML = `<span class="material-icons">
+                    ${this.videoPlayer.muted ? 'volume_off' : 'volume_up'}</span>`;
+                this.volumeSlider.value = this.videoPlayer.muted ? 0 : this.videoPlayer.volume * 100;
             }
 
-            changeVolume(value) {
-                this.videoPlayer.volume = value / 100;
-                if (value > 0) {
-                    this.videoPlayer.muted = false;
-                    this.muteBtn.querySelector('.material-icons').textContent = 'volume_up';
-                }
+            changeVolume(e) {
+                const volume = e.target.value / 100;
+                this.videoPlayer.volume = volume;
+                this.videoPlayer.muted = volume === 0;
+                this.muteBtn.innerHTML = `<span class="material-icons">
+                    ${volume === 0 ? 'volume_off' : 'volume_up'}</span>`;
             }
 
             toggleFullscreen() {
                 if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
-                    this.fullscreenBtn.querySelector('.material-icons').textContent = 'fullscreen_exit';
+                    this.videoPlayer.parentElement.requestFullscreen();
+                    this.fullscreenBtn.innerHTML = '<span class="material-icons">fullscreen_exit</span>';
                 } else {
                     document.exitFullscreen();
-                    this.fullscreenBtn.querySelector('.material-icons').textContent = 'fullscreen';
+                    this.fullscreenBtn.innerHTML = '<span class="material-icons">fullscreen</span>';
                 }
-            }
-
-            // UI Updates
-            onVideoPlay() {
-                this.playPauseBtn.querySelector('.material-icons').textContent = 'pause';
-            }
-
-            onVideoPause() {
-                this.playPauseBtn.querySelector('.material-icons').textContent = 'play_arrow';
             }
 
             showLoading() {
@@ -750,70 +750,11 @@
             hideLoading() {
                 this.loadingSpinner.style.display = 'none';
             }
-
-            showError(message) {
-                // Implement error display UI
-                console.error(message);
-            }
-
-            updateActiveChannel() {
-                const channelItems = this.channelsContainer.querySelectorAll('.channel-item');
-                channelItems.forEach(item => {
-                    item.classList.remove('active');
-                    if (parseInt(item.dataset.index) === this.currentChannelIndex) {
-                        item.classList.add('active');
-                    }
-                });
-            }
-
-            setupAutoHideControls() {
-                const container = document.querySelector('.video-container');
-                let timeout;
-
-                const showControls = () => {
-                    this.playerControls.style.opacity = '1';
-                    this.channelInfo.style.opacity = '1';
-                    clearTimeout(timeout);
-
-                    if (!this.videoPlayer.paused) {
-                        timeout = setTimeout(() => {
-                            this.playerControls.style.opacity = '0';
-                            this.channelInfo.style.opacity = '0';
-                        }, 3000);
-                    }
-                };
-
-                container.addEventListener('mousemove', showControls);
-                container.addEventListener('touchstart', showControls);
-                this.videoPlayer.addEventListener('play', showControls);
-            }
-
-            handleKeyPress(e) {
-                switch(e.key) {
-                    case ' ':
-                        this.togglePlayPause();
-                        break;
-                    case 'm':
-                    case 'M':
-                        this.toggleMute();
-                        break;
-                    case 'f':
-                    case 'F':
-                        this.toggleFullscreen();
-                        break;
-                    case 'Escape':
-                        this.closeMenu();
-                        this.closeChannels();
-                        break;
-                }
-            }
         }
 
-        // Initialize player when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            const player = new SmartTVPlayer();
+            const player = new TVPlayer();
         });
     </script>
 </body>
 </html>
-
