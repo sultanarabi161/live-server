@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,6 +27,9 @@
             min-height: 100vh;
             font-family: 'Roboto', sans-serif;
             overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
 
         .player-container {
@@ -42,12 +46,15 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .menu-btn {
             position: absolute;
-            top: 16px;
-            left: 16px;
+            top: 10px;
+            left: 10px;
             z-index: 11;
             background: rgba(0, 0, 0, 0.7);
             border: none;
@@ -57,34 +64,25 @@
             cursor: pointer;
             transition: all 0.3s;
             opacity: 0;
-            min-width: 36px;
-            min-height: 36px;
-        }
-
-        .menu-btn:focus {
-            outline: var(--focus-outline);
+            min-width: 32px;
+            min-height: 32px;
         }
 
         .menu-btn .material-icons {
-            font-size: 18px;
-        }
-
-        .menu-btn:hover {
-            background: var(--primary-color);
+            font-size: 16px;
         }
 
         .channel-panel {
             position: absolute;
             top: 0;
-            left: -280px;
-            width: 280px;
+            left: -260px;
+            width: 260px;
             height: 100%;
             background: rgba(0, 0, 0, 0.95);
             transition: left 0.3s ease;
             z-index: 10;
             display: flex;
             flex-direction: column;
-            padding-top: 50px;
         }
 
         .channel-panel.show {
@@ -92,86 +90,58 @@
         }
 
         .search-box {
-            position: fixed;
-            top: 50px;
+            position: sticky;
+            top: 0;
             left: 0;
-            width: 280px;
-            padding: 12px;
+            width: 100%;
+            padding: 10px;
             background: rgba(0, 0, 0, 0.95);
             z-index: 12;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-
-        .channel-panel.show .search-box {
-            transform: translateX(0);
         }
 
         .search-input {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             background: rgba(255, 255, 255, 0.2);
             border: none;
             border-radius: 4px;
             color: white;
-            font-size: 14px;
-        }
-
-        .search-input:focus {
-            outline: var(--focus-outline);
-            background: rgba(255, 255, 255, 0.3);
+            font-size: 13px;
         }
 
         .channels-container {
             flex: 1;
             overflow-y: auto;
-            padding: 12px;
-            margin-top: 50px;
+            padding: 10px;
+            padding-top: 0;
         }
 
         .channel-item {
             display: flex;
             align-items: center;
-            padding: 8px 12px;
+            padding: 8px 10px;
             color: white;
             cursor: pointer;
             border-radius: 4px;
             margin-bottom: 4px;
             background: rgba(255, 255, 255, 0.1);
-            font-size: 13px;
+            font-size: 12px;
             transition: all 0.2s;
         }
 
-        .channel-item:focus {
-            outline: var(--focus-outline);
-            background: rgba(229, 9, 20, 0.8);
-        }
-
-        .channel-item:hover,
-        .channel-item.active {
-            background: var(--primary-color);
-        }
-
         .channel-number {
-            min-width: 24px;
+            min-width: 22px;
             text-align: center;
-            margin-right: 12px;
+            margin-right: 10px;
             background: rgba(255, 255, 255, 0.2);
-            padding: 2px 5px;
+            padding: 2px 4px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         .channel-item .material-icons {
             font-size: 14px;
-            margin-right: 8px;
-        }
-
-        .channel-name {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            margin-right: 6px;
         }
 
         .player-controls {
@@ -180,10 +150,10 @@
             left: 0;
             right: 0;
             background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            padding: 16px;
+            padding: 12px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -193,111 +163,100 @@
             border: none;
             color: white;
             cursor: pointer;
-            padding: 8px;
+            padding: 6px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 36px;
-            min-height: 36px;
+            min-width: 32px;
+            min-height: 32px;
             transition: all 0.2s;
         }
 
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .control-btn:focus {
-            outline: var(--focus-outline);
-        }
-
         .control-btn .material-icons {
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .volume-control {
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-width: 100px;
+            gap: 8px;
+            min-width: 80px;
         }
 
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
-            height: 4px;
+            height: 3px;
             background: rgba(255,255,255,0.3);
             border-radius: 2px;
             cursor: pointer;
         }
 
-        input[type="range"]:focus {
-            outline: var(--focus-outline);
-        }
-
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             background: var(--primary-color);
             border-radius: 50%;
             cursor: pointer;
         }
 
         .info-modal {
+            position: absolute;
             display: none;
-            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.95);
-            padding: 20px;
+            padding: 16px;
             border-radius: 8px;
             color: white;
             z-index: 1000;
-            max-width: 400px;
-            width: 90%;
-            font-size: 13px;
+            max-width: 90%;
+            width: 300px;
+            font-size: 12px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .info-modal h2 {
-            color: var(--primary-color);
-            margin-bottom: 12px;
-            font-size: 18px;
+            font-size: 16px;
+            margin-bottom: 10px;
         }
 
         .info-modal p {
-            margin-bottom: 10px;
-            line-height: 1.4;
+            margin-bottom: 8px;
+            line-height: 1.3;
         }
 
         .info-modal ul {
-            margin-left: 18px;
-            margin-bottom: 10px;
+            margin-left: 16px;
+            margin-bottom: 8px;
         }
 
         .info-modal li {
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .close-modal {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
             background: none;
             border: none;
             color: white;
             cursor: pointer;
-            padding: 6px;
+            padding: 4px;
         }
 
         .close-modal .material-icons {
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .modal-overlay {
+            position: absolute;
             display: none;
-            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -311,8 +270,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: 3px solid rgba(255,255,255,0.3);
             border-top: 3px solid var(--primary-color);
             border-radius: 50%;
@@ -325,6 +284,7 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
+        /* Hover states */
         .player-container:hover .player-controls,
         .player-container:hover .menu-btn {
             opacity: 1;
@@ -334,43 +294,39 @@
             opacity: 0 !important;
         }
 
+        /* Consistent styling across all devices */
         @media only screen and (max-width: 959px) {
             .player-container {
                 width: 100vw;
                 height: 100vh;
-                overflow: hidden;
+                max-width: 100%;
+                max-height: 100%;
             }
             
             .channel-panel {
                 width: 240px;
                 left: -240px;
             }
-            
-            .search-box {
-                width: 240px;
-            }
-            
-            .control-btn {
-                min-width: 32px;
-                min-height: 32px;
-                padding: 6px;
-            }
-            
-            .control-btn .material-icons {
-                font-size: 18px;
-            }
-            
-            .volume-control {
-                min-width: 80px;
-            }
         }
 
-        @media only screen and (min-width: 960px) and (orientation: landscape) {
-            .player-container {
-                width: 100vw;
-                height: 100vh;
-                overflow: hidden;
-            }
+        /* Scrollbar styling */
+        .channels-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .channels-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .channels-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        /* Prevent text selection */
+        .channel-item, .control-btn, .menu-btn {
+            user-select: none;
+            -webkit-user-select: none;
         }
     </style>
 </head>
@@ -421,26 +377,23 @@
                 <span class="material-icons">close</span>
             </button>
             <h2>About Smart TV Player</h2>
-            <p><strong>Developer:</strong> Sultan Arabi</p>
             <p><strong>Version:</strong> 1.0.5</p>
             <p><strong>Features:</strong></p>
             <ul>
-                <li>Multi-platform support (Desktop, Mobile, Android TV)</li>
-                <li>Keyboard, Mouse, Remote, and Touch controls</li>
-                <li>Channel search functionality</li>
-                <li>PIP mode support</li>
-                <li>Full-screen mode</li>
+                <li>Multi-platform support</li>
+                <li>Touch & Remote controls</li>
+                <li>Channel search</li>
+                <li>PIP mode</li>
                 <li>Volume control</li>
-                <li>Channel navigation</li>
             </ul>
             <p><strong>Controls:</strong></p>
             <ul>
-                <li>Arrow keys: Navigate channels</li>
-                <li>Enter: Select channel</li>
+                <li>Arrow keys: Navigate</li>
+                <li>Enter: Select</li>
                 <li>Space: Play/Pause</li>
                 <li>M: Mute/Unmute</li>
-                <li>F: Toggle fullscreen</li>
-                <li>P: Toggle PIP mode</li>
+                <li>F: Fullscreen</li>
+                <li>P: PIP mode</li>
             </ul>
         </div>
     </div>
@@ -455,7 +408,6 @@
                 this.currentChannelIndex = 0;
                 this.channels = [];
                 this.hideControlsTimeout = null;
-                this.setupTVSupport();
             }
 
             initializeElements() {
@@ -477,59 +429,42 @@
                 this.controlElements = document.querySelectorAll('.player-controls, .menu-btn');
             }
 
-            setupTVSupport() {
-                const isTVBrowser = /\b(TV|SmartTV|SMART-TV|GoogleTV|AppleTV|Android TV)\b/.test(navigator.userAgent);
-                
-                if (isTVBrowser) {
-                    document.documentElement.style.setProperty('--focus-outline', '3px solid #e50914');
-                    
-                    document.querySelectorAll('.control-btn, .channel-item').forEach(el => {
-                        el.style.minWidth = '36px';
-                        el.style.minHeight = '36px';
-                    });
-                }
-            }
-
             setupEventListeners() {
-                this.setupNavigationControls();
-                this.setupTouchControls();
-                this.setupAutoHide();
-                this.setupBasicControls();
-                this.setupModalControls();
-            }
-
-            setupModalControls() {
+                // Basic controls
+                this.menuBtn.addEventListener('click', () => this.toggleChannelPanel());
+                this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
+                this.muteBtn.addEventListener('click', () => this.toggleMute());
+                this.volumeSlider.addEventListener('input', (e) => this.changeVolume(e));
+                this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+                this.pipBtn.addEventListener('click', () => this.togglePiP());
                 this.infoBtn.addEventListener('click', () => this.showInfoModal());
                 this.closeModal.addEventListener('click', () => this.hideInfoModal());
                 this.modalOverlay.addEventListener('click', () => this.hideInfoModal());
-                
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.infoModal.style.display === 'block') {
-                        this.hideInfoModal();
-                    }
+                this.channelSearch.addEventListener('input', () => this.searchChannels());
+
+                // Video player events
+                this.videoPlayer.addEventListener('waiting', () => this.showLoading());
+                this.videoPlayer.addEventListener('playing', () => this.hideLoading());
+                this.videoPlayer.addEventListener('play', () => {
+                    this.playPauseBtn.innerHTML = '<span class="material-icons">pause</span>';
                 });
-            }
+                this.videoPlayer.addEventListener('pause', () => {
+                    this.playPauseBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
+                });
 
-            showInfoModal() {
-                this.infoModal.style.display = 'block';
-                this.modalOverlay.style.display = 'block';
-            }
-
-            hideInfoModal() {
-                this.infoModal.style.display = 'none';
-                this.modalOverlay.style.display = 'none';
-            }
-
-            setupNavigationControls() {
+                // Keyboard controls
                 document.addEventListener('keydown', (e) => {
-                    if (this.infoModal.style.display === 'block') return;
-                    
+                    if (this.infoModal.style.display === 'block' && e.key === 'Escape') {
+                        this.hideInfoModal();
+                        return;
+                    }
+
                     switch(e.key) {
                         case 'ArrowUp':
-                            this.navigateChannelList('up');
-                            break;
                         case 'ArrowDown':
-                            this.navigateChannelList('down');
+                            if (this.channelPanel.classList.contains('show')) {
+                                this.navigateChannelList(e.key === 'ArrowUp' ? 'up' : 'down');
+                            }
                             break;
                         case 'ArrowLeft':
                             this.changeChannel('prev');
@@ -547,10 +482,6 @@
                             e.preventDefault();
                             this.togglePlayPause();
                             break;
-                        case 'p':
-                        case 'P':
-                            this.togglePiP();
-                            break;
                         case 'm':
                         case 'M':
                             this.toggleMute();
@@ -559,47 +490,20 @@
                         case 'F':
                             this.toggleFullscreen();
                             break;
+                        case 'p':
+                        case 'P':
+                            this.togglePiP();
+                            break;
                     }
                 });
 
-                this.channelsContainer.addEventListener('wheel', (e) => {
-                    e.preventDefault();
-                    this.channelsContainer.scrollTop += e.deltaY;
-                }, { passive: false });
-            }
-
-            setupBasicControls() {
-                this.menuBtn.addEventListener('click', () => this.toggleChannelPanel());
-                this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
-                this.muteBtn.addEventListener('click', () => this.toggleMute());
-                this.volumeSlider.addEventListener('input', (e) => this.changeVolume(e));
-                this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
-                this.pipBtn.addEventListener('click', () => this.togglePiP());
-
-                this.channelSearch.addEventListener('input', () => this.searchChannels());
-                this.channelSearch.addEventListener('focus', () => {
-                    this.channelSearch.value = '';
-                    this.searchChannels();
-                });
-
-                this.videoPlayer.addEventListener('waiting', () => this.showLoading());
-                this.videoPlayer.addEventListener('playing', () => this.hideLoading());
-                this.videoPlayer.addEventListener('play', () => {
-                    this.playPauseBtn.innerHTML = '<span class="material-icons">pause</span>';
-                });
-                this.videoPlayer.addEventListener('pause', () => {
-                    this.playPauseBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
-                });
-            }
-
-            setupAutoHide() {
+                // Auto-hide controls
+                let timeout;
                 const showControls = () => {
                     this.controlElements.forEach(el => el.classList.remove('hide-controls'));
-                    if (this.hideControlsTimeout) {
-                        clearTimeout(this.hideControlsTimeout);
-                    }
+                    clearTimeout(timeout);
                     if (!this.videoPlayer.paused && !this.channelPanel.classList.contains('show')) {
-                        this.hideControlsTimeout = setTimeout(() => {
+                        timeout = setTimeout(() => {
                             this.controlElements.forEach(el => el.classList.add('hide-controls'));
                         }, 3000);
                     }
@@ -609,9 +513,8 @@
                 this.videoPlayer.parentElement.addEventListener('touchstart', showControls);
                 this.videoPlayer.addEventListener('pause', showControls);
                 this.videoPlayer.addEventListener('play', showControls);
-            }
 
-            setupTouchControls() {
+                // Touch controls
                 let touchStartX = 0;
                 let touchStartY = 0;
 
@@ -690,26 +593,17 @@
                         const name = item.querySelector('.channel-name').textContent;
                         this.playChannel(url, name);
                     });
-
-                    item.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            const url = item.dataset.url;
-                            const name = item.querySelector('.channel-name').textContent;
-                            this.playChannel(url, name);
-                        }
-                    });
                 });
             }
 
             searchChannels() {
                 const searchTerm = this.channelSearch.value.toLowerCase();
-                const channelItems = this.channelsContainer.querySelectorAll('.channel-item');
+                const items = this.channelsContainer.querySelectorAll('.channel-item');
                 
-                channelItems.forEach(item => {
-                    const channelName = item.querySelector('.channel-name').textContent.toLowerCase();
-                    const channelNumber = item.querySelector('.channel-number').textContent;
-                    const matches = channelName.includes(searchTerm) || channelNumber.includes(searchTerm);
-                    item.style.display = matches ? 'flex' : 'none';
+                items.forEach(item => {
+                    const name = item.querySelector('.channel-name').textContent.toLowerCase();
+                    const number = item.querySelector('.channel-number').textContent;
+                    item.style.display = (name.includes(searchTerm) || number.includes(searchTerm)) ? 'flex' : 'none';
                 });
             }
 
@@ -725,15 +619,11 @@
                     this.hls.loadSource(url);
                     this.hls.attachMedia(this.videoPlayer);
                     this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        this.videoPlayer.play().catch(() => {
-                            console.log('Playback failed, trying again...');
-                        });
+                        this.videoPlayer.play().catch(console.log);
                     });
                 } else if (this.videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
                     this.videoPlayer.src = url;
-                    this.videoPlayer.play().catch(() => {
-                        console.log('Playback failed, trying again...');
-                    });
+                    this.videoPlayer.play().catch(console.log);
                 }
 
                 this.channelPanel.classList.remove('show');
@@ -752,9 +642,6 @@
 
             toggleChannelPanel() {
                 this.channelPanel.classList.toggle('show');
-                if (this.channelPanel.classList.contains('show')) {
-                    this.channelSearch.focus();
-                }
             }
 
             closeChannelPanel() {
@@ -776,8 +663,9 @@
             }
 
             updateVolumeIcon() {
-                const icon = this.videoPlayer.muted || this.videoPlayer.volume === 0 ? 'volume_off' : 'volume_up';
-                this.muteBtn.innerHTML = `<span class="material-icons">${icon}</span>`;
+                this.muteBtn.innerHTML = `<span class="material-icons">
+                    ${this.videoPlayer.muted || this.videoPlayer.volume === 0 ? 'volume_off' : 'volume_up'}
+                </span>`;
             }
 
             changeVolume(e) {
@@ -817,27 +705,34 @@
                 this.loadingSpinner.style.display = 'none';
             }
 
+            showInfoModal() {
+                this.infoModal.style.display = 'block';
+                this.modalOverlay.style.display = 'block';
+            }
+
+            hideInfoModal() {
+                this.infoModal.style.display = 'none';
+                this.modalOverlay.style.display = 'none';
+            }
+
             navigateChannelList(direction) {
                 const items = Array.from(this.channelsContainer.querySelectorAll('.channel-item:not([style*="display: none"])'));
                 const currentIndex = items.findIndex(item => item === document.activeElement);
-                let nextIndex;
-
-                if (direction === 'up') {
-                    nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
-                } else {
-                    nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
-                }
+                let nextIndex = direction === 'up' 
+                    ? (currentIndex > 0 ? currentIndex - 1 : items.length - 1)
+                    : (currentIndex < items.length - 1 ? currentIndex + 1 : 0);
 
                 items[nextIndex].focus();
                 items[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
             selectCurrentChannel() {
-                const focusedChannel = document.activeElement;
-                if (focusedChannel.classList.contains('channel-item')) {
-                    const url = focusedChannel.dataset.url;
-                    const name = focusedChannel.querySelector('.channel-name').textContent;
-                    this.playChannel(url, name);
+                const focused = document.activeElement;
+                if (focused.classList.contains('channel-item')) {
+                    this.playChannel(
+                        focused.dataset.url,
+                        focused.querySelector('.channel-name').textContent
+                    );
                 }
             }
 
@@ -845,25 +740,20 @@
                 const visibleChannels = Array.from(this.channelsContainer.querySelectorAll('.channel-item:not([style*="display: none"])'));
                 if (visibleChannels.length === 0) return;
 
-                let nextIndex;
                 const currentIndex = visibleChannels.findIndex(item => item.classList.contains('active'));
-
-                if (direction === 'next') {
-                    nextIndex = currentIndex < visibleChannels.length - 1 ? currentIndex + 1 : 0;
-                } else {
-                    nextIndex = currentIndex > 0 ? currentIndex - 1 : visibleChannels.length - 1;
-                }
+                const nextIndex = direction === 'next'
+                    ? (currentIndex < visibleChannels.length - 1 ? currentIndex + 1 : 0)
+                    : (currentIndex > 0 ? currentIndex - 1 : visibleChannels.length - 1);
 
                 const nextChannel = visibleChannels[nextIndex];
-                const url = nextChannel.dataset.url;
-                const name = nextChannel.querySelector('.channel-name').textContent;
-                this.playChannel(url, name);
+                this.playChannel(
+                    nextChannel.dataset.url,
+                    nextChannel.querySelector('.channel-name').textContent
+                );
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const player = new TVPlayer();
-        });
+        document.addEventListener('DOMContentLoaded', () => new TVPlayer());
     </script>
 </body>
 </html>
