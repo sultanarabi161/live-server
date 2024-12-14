@@ -3,534 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - Premium Live TV</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>LiveStream - Settings</title>
+  
+   
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
-        /* Base Styles */
         :root {
-            --primary-color: #2196F3;
-            --secondary-color: #1976D2;
-            --background-color: #f8f9fa;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --text-light: #666666;
-            --border-radius: 12px;
-            --shadow: 0 2px 10px rgba(0,0,0,0.1);
-            --transition: all 0.3s ease;
-        }
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --background-color: #f4f4f4;
+    --text-color: #333;
+    --light-bg: #ffffff;
+    --border-color: #e0e0e0;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
 
-        /* Header Styles */
-        .settings-header {
-            background: linear-gradient(135deg, #1a1a1a, #2c3e50);
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            color: white;
-        }
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-        .back-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: var(--transition);
-        }
+/* Header Styles */
+header {
+    display: flex;
+    align-items: center;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
 
-        .back-btn:hover {
-            background: rgba(255,255,255,0.1);
-        }
+.icon-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 15px;
+}
 
-        /* Settings Container */
-        .settings-container {
-            margin-top: 80px;
-            padding: 20px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+.header-title h1 {
+    flex-grow: 1;
+    text-align: center;
+}
 
-        .settings-section {
-            background: var(--card-color);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
+/* Settings Container */
+.settings-container {
+    background-color: var(--light-bg);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-        .section-title {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+.settings-section {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
 
-        .section-title i {
-            color: var(--primary-color);
-        }
+.settings-section:last-child {
+    border-bottom: none;
+}
 
-        /* Setting Items */
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
+.settings-section h2 {
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
 
-        .setting-item:last-child {
-            border-bottom: none;
-        }
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
 
-        .setting-label {
-            flex: 1;
-            padding-right: 20px;
-        }
+.setting-item label {
+    font-weight: 500;
+}
 
-        .setting-title {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
+.setting-item input[type="checkbox"] {
+    appearance: none;
+    width: 40px;
+    height: 20px;
+    background-color: var(--border-color);
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+}
 
-        .setting-description {
-            font-size: 0.9rem;
-            color: var(--text-light);
-        }
+.setting-item input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+}
 
-        /* Toggle Switch */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
+.setting-item input[type="checkbox"]:checked {
+    background-color: var(--secondary-color);
+}
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+.setting-item input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: var(--transition);
-            border-radius: 34px;
-        }
+.setting-item select {
+    padding: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: var(--transition);
-            border-radius: 50%;
-        }
+.setting-item button {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-        input:checked + .slider {
-            background-color: var(--primary-color);
-        }
+.setting-item button:hover {
+    background-color: var(--primary-color);
+}
 
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
+/* About App Section */
+.about-app {
+    text-align: center;
+    color: var(--text-color);
+}
 
-        /* Select Dropdown */
-        .setting-select {
-            padding: 10px;
-            border-radius: var(--border-radius);
-            border: 2px solid #eee;
-            background: white;
-            min-width: 150px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+.about-app p {
+    margin: 10px 0;
+}
 
-        .setting-select:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
+/* Responsive Design */
+@media screen and (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
 
-        /* Button Styles */
-        .setting-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .setting-btn.danger {
-            background: #dc3545;
-        }
-
-        .setting-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        /* About Section */
-        .about-section {
-            text-align: center;
-            padding: 30px;
-        }
-
-        .app-logo {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 20px;
-        }
-
-        .app-version {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin: 10px 0 20px;
-        }
-
-        .developer-info {
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 1px solid #eee;
-        }
-
-        /* Notification */
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary-color);
-            color: white;
-            padding: 15px 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: var(--transition);
-            z-index: 1000;
-        }
-
-        .notification.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* Dark Mode Styles */
-        body.dark-mode {
-            --background-color: #1a1a1a;
-            --card-color: #2c2c2c;
-            --text-color: #ffffff;
-            --text-light: #cccccc;
-        }
-
-        body.dark-mode .setting-item {
-            border-bottom-color: rgba(255,255,255,0.1);
-        }
-
-        body.dark-mode .setting-select {
-            background: #333;
-            border-color: #444;
-            color: white;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .settings-container {
-                padding: 10px;
-            }
-
-            .setting-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .setting-label {
-                padding-right: 0;
-            }
-
-            .setting-select {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .section-title {
-                font-size: 1.2rem;
-            }
-
-            .settings-section {
-                padding: 15px;
-            }
-        }
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="settings-header">
-        <button class="back-btn" onclick="history.back()">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <h1>Settings</h1>
-    </header>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <button id="back-btn" class="icon-btn">
+                <i class="ri-arrow-left-line"></i>
+            </button>
+            <div class="header-title">
+                <h1>App Settings</h1>
+            </div>
+        </header>
 
-    <!-- Main Settings Container -->
-    <div class="settings-container">
-        <!-- Playback Settings -->
-        <div class="settings-section">
-            <h2 class="section-title">
-                <i class="fas fa-play-circle"></i>
-                Playback Settings
-            </h2>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Auto Play</span>
-                    <span class="setting-description">Automatically play channels when selected</span>
+        <!-- Settings Sections -->
+        <main class="settings-container">
+            <!-- App Preferences -->
+            <section class="settings-section">
+                <h2>App Preferences</h2>
+                <div class="setting-item">
+                    <label for="dark-mode">Dark Mode</label>
+                    <input type="checkbox" id="dark-mode">
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="autoPlay" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Default Quality</span>
-                    <span class="setting-description">Select preferred video quality</span>
+                <div class="setting-item">
+                    <label for="autoplay">Autoplay Channels</label>
+                    <input type="checkbox" id="autoplay">
                 </div>
-                <select class="setting-select" id="defaultQuality">
-                    <option value="auto">Auto</option>
-                    <option value="1080">1080p</option>
-                    <option value="720">720p</option>
-                    <option value="480">480p</option>
-                </select>
-            </div>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Hardware Acceleration</span>
-                    <span class="setting-description">Use GPU for better performance</span>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="hwAccel" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
+            </section>
 
-        <!-- Interface Settings -->
-        <div class="settings-section">
-            <h2 class="section-title">
-                <i class="fas fa-palette"></i>
-                Interface Settings
-            </h2>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Dark Mode</span>
-                    <span class="setting-description">Enable dark theme</span>
+            <!-- Playback Settings -->
+            <section class="settings-section">
+                <h2>Playback Settings</h2>
+                <div class="setting-item">
+                    <label for="video-quality">Default Video Quality</label>
+                    <select id="video-quality">
+                        <option value="auto">Auto</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="darkMode">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Channel View</span>
-                    <span class="setting-description">Choose channel list display style</span>
-                </div>
-                <select class="setting-select" id="channelView">
-                    <option value="grid">Grid</option>
-                    <option value="list">List</option>
-                </select>
-            </div>
-        </div>
+            </section>
 
-        <!-- Network Settings -->
-        <div class="settings-section">
-            <h2 class="section-title">
-                <i class="fas fa-network-wired"></i>
-                Network Settings
-            </h2>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Buffer Size</span>
-                    <span class="setting-description">Set video buffer size (in seconds)</span>
+            <!-- Data Management -->
+            <section class="settings-section">
+                <h2>Data Management</h2>
+                <div class="setting-item">
+                    <label>Clear All Playlists</label>
+                    <button id="clear-playlists">Clear</button>
                 </div>
-                <select class="setting-select" id="bufferSize">
-                    <option value="10">10 seconds</option>
-                    <option value="20">20 seconds</option>
-                    <option value="30">30 seconds</option>
-                    <option value="60">60 seconds</option>
-                </select>
-            </div>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Low Latency Mode</span>
-                    <span class="setting-description">Reduce stream delay (may affect stability)</span>
+                <div class="setting-item">
+                    <label>Reset to Default Settings</label>
+                    <button id="reset-settings">Reset</button>
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="lowLatency">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
+            </section>
 
-        <!-- Storage Settings -->
-        <div class="settings-section">
-            <h2 class="section-title">
-                <i class="fas fa-database"></i>
-                Storage Settings
-            </h2>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Cache Channels</span>
-                    <span class="setting-description">Store channel data for faster loading</span>
+            <!-- About App -->
+            <section class="settings-section">
+                <h2>About LiveStream</h2>
+                <div class="about-app">
+                    <p>Version: 1.0.0</p>
+                    <p>Developed by: StreamMaster Team</p>
+                    <p>Contact: support@livestream.com</p>
+                    <p>Copyright © 2024 All Rights Reserved</p>
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="cacheChannels" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-title">Clear Cache</span>
-                    <span class="setting-description">Remove all stored channel data</span>
-                </div>
-                <button class="setting-btn danger" onclick="clearCache()">
-                    Clear Cache
-                </button>
-            </div>
-        </div>
-
-        <!-- About Section -->
-        <div class="settings-section about-section">
-            <img src="assets/images/logo.png" alt="App Logo" class="app-logo">
-            <h2>Premium Live TV</h2>
-            <div class="app-version">Version 2.0.0</div>
-            <p>Experience premium live TV streaming with our advanced features and intuitive interface.</p>
-            
-            <div class="developer-info">
-                <h3>Developer Information</h3>
-                <p>Created by Your Name</p>
-                <p>Contact: developer@email.com</p>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Load saved settings
-            loadSettings();
+      document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const backBtn = document.getElementById('back-btn');
+    const darkModeToggle = document.getElementById('dark-mode');
+    const autoplayToggle = document.getElementById('autoplay');
+    const videoQualitySelect = document.getElementById('video-quality');
+    const clearPlaylistsBtn = document.getElementById('clear-playlists');
+    const resetSettingsBtn = document.getElementById('reset-settings');
 
-            // Add change listeners to all settings
-            document.querySelectorAll('input[type="checkbox"], select').forEach(element => {
-                element.addEventListener('change', saveSettings);
-            });
+    // Load saved settings
+    function loadSettings() {
+        // Dark Mode
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        darkModeToggle.checked = isDarkMode;
+        document.body.classList.toggle('dark-mode', isDarkMode);
 
-            // Functions
-            function loadSettings() {
-                const settings = JSON.parse(localStorage.getItem('appSettings')) || {
-                    autoPlay: true,
-                    defaultQuality: 'auto',
-                    hwAccel: true,
-                    darkMode: false,
-                    channelView: 'grid',
-                    bufferSize: '30',
-                    lowLatency: false,
-                    cacheChannels: true
-                };
+        // Autoplay
+        const isAutoplay = localStorage.getItem('autoplay') === 'true';
+        autoplayToggle.checked = isAutoplay;
 
-                // Apply settings to form elements
-                Object.entries(settings).forEach(([key, value]) => {
-                    const element = document.getElementById(key);
-                    if (element) {
-                        if (element.type === 'checkbox') {
-                            element.checked = value;
-                        } else {
-                            element.value = value;
-                        }
-                    }
-                });
+        // Video Quality
+        const savedQuality = localStorage.getItem('videoQuality') || 'auto';
+        videoQualitySelect.value = savedQuality;
+    }
 
-                // Apply dark mode if enabled
-                if (settings.darkMode) {
-                    document.body.classList.add('dark-mode');
-                }
-            }
+    // Save settings
+    function saveSettings() {
+        // Dark Mode
+        localStorage.setItem('darkMode', darkModeToggle.checked);
+        document.body.classList.toggle('dark-mode', darkModeToggle.checked);
 
-            function saveSettings() {
-                const settings = {
-                    autoPlay: document.getElementById('autoPlay').checked,
-                    defaultQuality: document.getElementById('defaultQuality').value,
-                    hwAccel: document.getElementById('hwAccel').checked,
-                    darkMode: document.getElementById('darkMode').checked,
-                    channelView: document.getElementById('channelView').value,
-                    bufferSize: document.getElementById('bufferSize').value,
-                    lowLatency: document.getElementById('lowLatency').checked,
-                    cacheChannels: document.getElementById('cacheChannels').checked
-                };
+        // Autoplay
+        localStorage.setItem('autoplay', autoplayToggle.checked);
 
-                localStorage.setItem('appSettings', JSON.stringify(settings));
-                
-                // Apply dark mode immediately
-                document.body.classList.toggle('dark-mode', settings.darkMode);
-                
-                showNotification('Settings saved successfully');
-            }
+        // Video Quality
+        localStorage.setItem('videoQuality', videoQualitySelect.value);
+    }
 
-            window.clearCache = function() {
-                if (confirm('Are you sure you want to clear all cached data?')) {
-                    localStorage.removeItem('channelCache');
-                    showNotification('Cache cleared successfully');
-                }
-            }
+    // Event Listeners for Settings
+    darkModeToggle.addEventListener('change', saveSettings);
+    autoplayToggle.addEventListener('change', saveSettings);
+    videoQualitySelect.addEventListener('change', saveSettings);
 
-            function showNotification(message) {
-                const notification = document.createElement('div');
-                notification.className = 'notification';
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.classList.add('show');
-                    setTimeout(() => {
-                        notification.classList.remove('show');
-                        setTimeout(() => notification.remove(), 300);
-                    }, 3000);
-                }, 100);
-            }
-        });
+    // Clear Playlists
+    clearPlaylistsBtn.addEventListener('click', () => {
+        const confirmClear = confirm('Are you sure you want to clear all playlists?');
+        if (confirmClear) {
+            localStorage.removeItem('playlists');
+            alert('All playlists have been cleared.');
+        }
+    });
+
+    // Reset Settings
+    resetSettingsBtn.addEventListener('click', () => {
+        const confirmReset = confirm('Are you sure you want to reset all settings?');
+        if (confirmReset) {
+            // Reset localStorage
+            localStorage.clear();
+            
+            // Reset toggles and selects to default
+            darkModeToggle.checked = false;
+            autoplayToggle.checked = true;
+            videoQualitySelect.value = 'auto';
+
+            // Save default settings
+            saveSettings();
+
+            alert('All settings have been reset to default.');
+        }
+    });
+
+    // Navigation
+    backBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+    });
+
+    // Initial load of settings
+    loadSettings();
+});  
     </script>
 </body>
 </html>
