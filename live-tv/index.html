@@ -1,1 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Live TV</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="assets/images/logo.png" alt="Premium TV Logo">
+            <h1>Premium Live TV</h1>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" id="addPlaylistBtn">
+                <i class="fas fa-plus"></i>
+                <span>Add Playlist</span>
+            </button>
+            <button class="header-btn" onclick="location.href='settings.html'">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+    </header>
 
+    <main class="main-content">
+        <div class="playlist-grid" id="playlistGrid"></div>
+    </main>
+
+    <!-- Add Playlist Modal -->
+    <div class="modal" id="playlistModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Playlist</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Playlist Name</label>
+                    <input type="text" id="playlistName" placeholder="Enter playlist name">
+                </div>
+                <div class="input-group">
+                    <label>M3U URL</label>
+                    <input type="text" id="m3uUrl" placeholder="Enter M3U playlist URL">
+                </div>
+                <div class="input-group">
+                    <label>Or Upload M3U File</label>
+                    <input type="file" id="m3uFile" accept=".m3u,.m3u8">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" id="cancelBtn">Cancel</button>
+                <button class="btn primary" id="addBtn">Add Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About</h3>
+                <p>Premium Live TV brings you the best streaming experience.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="settings.html">Settings</a></li>
+                    <li><a href="#" id="clearData">Clear Data</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Premium Live TV. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
