@@ -1,1 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Premium Live TV</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <button class="back-btn" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Settings</h1>
+        </div>
+    </header>
 
+    <!-- Main Settings Container -->
+    <div class="settings-container">
+        <!-- Playback Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-play-circle"></i>
+                Playback Settings
+            </h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Auto Play</span>
+                    <span class="setting-description">Automatically play channels when selected</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="autoPlay" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Default Quality</span>
+                    <span class="setting-description">Select preferred video quality</span>
+                </div>
+                <select class="setting-select" id="defaultQuality">
+                    <option value="auto">Auto</option>
+                    <option value="1080">1080p</option>
+                    <option value="720">720p</option>
+                    <option value="480">480p</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Hardware Acceleration</span>
+                    <span class="setting-description">Use GPU for better performance</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="hwAccel" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Interface Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-palette"></i>
+                Interface Settings
+            </h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Dark Mode</span>
+                    <span class="setting-description">Enable dark theme</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="darkMode">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Channel View</span>
+                    <span class="setting-description">Choose channel list display style</span>
+                </div>
+                <select class="setting-select" id="channelView">
+                    <option value="grid">Grid</option>
+                    <option value="list">List</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Network Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-network-wired"></i>
+                Network Settings
+            </h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Buffer Size</span>
+                    <span class="setting-description">Set video buffer size (in seconds)</span>
+                </div>
+                <select class="setting-select" id="bufferSize">
+                    <option value="10">10 seconds</option>
+                    <option value="20">20 seconds</option>
+                    <option value="30">30 seconds</option>
+                    <option value="60">60 seconds</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Low Latency Mode</span>
+                    <span class="setting-description">Reduce stream delay (may affect stability)</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="lowLatency">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Storage Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-database"></i>
+                Storage Settings
+            </h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Cache Channels</span>
+                    <span class="setting-description">Store channel data for faster loading</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="cacheChannels" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Clear Cache</span>
+                    <span class="setting-description">Remove all stored channel data</span>
+                </div>
+                <button class="setting-btn danger" onclick="clearCache()">
+                    Clear Cache
+                </button>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="settings-section about-section">
+            <img src="assets/images/logo.png" alt="App Logo" class="app-logo">
+            <h2>Premium Live TV</h2>
+            <div class="app-version">Version 2.0.0</div>
+            <p>Experience premium live TV streaming with our advanced features and intuitive interface.</p>
+            
+            <div class="developer-info">
+                <h3>Developer Information</h3>
+                <p>Created by Your Name</p>
+                <p>Contact: developer@email.com</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load saved settings
+            loadSettings();
+
+            // Add change listeners to all settings
+            document.querySelectorAll('input[type="checkbox"], select').forEach(element => {
+                element.addEventListener('change', saveSettings);
+            });
+        });
+
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('appSettings')) || {
+                autoPlay: true,
+                defaultQuality: 'auto',
+                hwAccel: true,
+                darkMode: false,
+                channelView: 'grid',
+                bufferSize: '30',
+                lowLatency: false,
+                cacheChannels: true
+            };
+
+            // Apply settings to form elements
+            Object.entries(settings).forEach(([key, value]) => {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = value;
+                    } else {
+                        element.value = value;
+                    }
+                }
+            });
+
+            // Apply dark mode if enabled
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
+        function saveSettings() {
+            const settings = {
+                autoPlay: document.getElementById('autoPlay').checked,
+                defaultQuality: document.getElementById('defaultQuality').value,
+                hwAccel: document.getElementById('hwAccel').checked,
+                darkMode: document.getElementById('darkMode').checked,
+                channelView: document.getElementById('channelView').value,
+                bufferSize: document.getElementById('bufferSize').value,
+                lowLatency: document.getElementById('lowLatency').checked,
+                cacheChannels: document.getElementById('cacheChannels').checked
+            };
+
+            localStorage.setItem('appSettings', JSON.stringify(settings));
+            
+            // Apply dark mode immediately
+            document.body.classList.toggle('dark-mode', settings.darkMode);
+            
+            showNotification('Settings saved successfully');
+        }
+
+        function clearCache() {
+            if (confirm('Are you sure you want to clear all cached data?')) {
+                localStorage.removeItem('channelCache');
+                showNotification('Cache cleared successfully');
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }, 100);
+        }
+    </script>
+</body>
+</html>
