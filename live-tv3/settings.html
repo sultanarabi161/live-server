@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Live TV</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #f0f2f5;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --text-color: #333;
+            --text-secondary: #666;
+            --border-color: #ddd;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        body {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            --secondary-color: #1a1a1a;
+            --text-color: #fff;
+            --text-secondary: #ccc;
+            --border-color: #444;
+            background: #1a1a1a;
+        }
+
+        .header {
+            background: #fff;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dark-mode .header {
+            background: #2d2d2d;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 0.5rem;
+            margin-right: 1rem;
+        }
+
+        .settings-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .settings-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .dark-mode .settings-section {
+            background: #2d2d2d;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            font-size: 1.1em;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            flex: 1;
+        }
+
+        .setting-name {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: var(--text-color);
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 26px;
+        }
+
+        .toggle-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        .toggle-input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Select Dropdown */
+        .select-input {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            color: var(--text-color);
+            background-color: transparent;
+            min-width: 150px;
+        }
+
+        .dark-mode .select-input {
+            background: #2d2d2d;
+            color: #fff;
+        }
+
+        /* Range Slider */
+        .range-slider {
+            width: 200px;
+            -webkit-appearance: none;
+            height: 5px;
+            border-radius: 5px;
+            background: var(--border-color);
+            outline: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        /* Storage Info */
+        .storage-info {
+            background: var(--secondary-color);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+
+        .storage-bar {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+
+        .storage-used {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        /* About Section */
+        .about-section {
+            text-align: center;
+        }
+
+        .app-version {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: var(--secondary-color);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-link {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .social-link:hover {
+            transform: scale(1.2);
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .settings-section {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 0.5rem;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .setting-item > :not(.setting-label) {
+                align-self: flex-end;
+            }
+
+            .range-slider {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-button" id="backButton">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1>Settings</h1>
+    </div>
+
+    <div class="settings-container">
+        <!-- Playback Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-play-circle"></i>
+                Playback Settings
+            </h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-name">Auto Play</div>
+                    <div class="setting-description">Automatically play channels when selected</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input" id="autoPlayToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-name">Default Quality</div>
+                    <div class="setting-description">Select preferred streaming quality</div>
+                </div>
+                <select class="select-input" id="qualitySelect">
+                    <option value="auto">Auto</option>
+                    <option value="1080p">1080p</option>
+                    <option value="720p">720p</option>
+                    <option value="480p">480p</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-name">Volume Level</div>
+                    <div class="setting-description">Set default volume level</div>
+                </div>
+                <input type="range" class="range-slider" id="volumeSlider" min="0" max="100" value="100">
+            </div>
+        </div>
+
+        <!-- Interface Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-palette"></i>
+                Interface Settings
+            </h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-name">Dark Mode</div>
+                    <div class="setting-description">Enable dark theme for better viewing</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input" id="darkModeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-name">Show Channel Numbers</div>
+                    <div class="setting-description">Display channel numbers in playlist</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input" id="channelNumbersToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Storage Settings -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-database"></i>
+                Storage Settings
+            </h2>
+            <div class="storage-info">
+                <div>Storage Used: <span id="storageUsed">0 MB</span> / <span id="storageTotal">1000 MB</span></div>
+                <div class="storage-bar">
+                    <div class="storage-used" id="storageBar"></div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-name">Clear Cache</div>
+                    <div class="setting-description">Clear temporary data to free up space</div>
+                </div>
+                <button class="btn btn-warning" id="clearCacheBtn">Clear Cache</button>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="settings-section about-section">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                About
+            </h2>
+            <p>Live TV Streaming App</p>
+            <div class="app-version">Version 1.0.0</div>
+            <p>Developed by Your Name</p>
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                Danger Zone
+            </h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-name">Clear All Data</div>
+                    <div class="setting-description">Remove all playlists and settings. This action cannot be undone.</div>
+                </div>
+                <button class="btn btn-danger" id="clearDataBtn">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const backButton = document.getElementById('backButton');
+            const autoPlayToggle = document.getElementById('autoPlayToggle');
+            const qualitySelect = document.getElementById('qualitySelect');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const channelNumbersToggle = document.getElementById('channelNumbersToggle');
+            const clearCacheBtn = document.getElementById('clearCacheBtn');
+            const clearDataBtn = document.getElementById('clearDataBtn');
+            const storageBar = document.getElementById('storageBar');
+            const storageUsed = document.getElementById('storageUsed');
+
+            // Load saved settings
+            const settings = JSON.parse(localStorage.getItem('settings')) || {
+                autoPlay: true,
+                quality: 'auto',
+                volume: 100,
+                darkMode: false,
+                showChannelNumbers: true
+            };
+
+            // Initialize settings
+            autoPlayToggle.checked = settings.autoPlay;
+            qualitySelect.value = settings.quality;
+            volumeSlider.value = settings.volume;
+            darkModeToggle.checked = settings.darkMode;
+            channelNumbersToggle.checked = settings.showChannelNumbers;
+
+            // Apply dark mode if enabled
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+
+            // Update storage info
+            function updateStorageInfo() {
+                const used = Math.floor(JSON.stringify(localStorage).length / 1024);
+                storageUsed.textContent = `${used} KB`;
+                storageBar.style.width = `${(used / 1000) * 100}%`;
+            }
+
+            // Save settings
+            function saveSettings() {
+                const newSettings = {
+                    autoPlay: autoPlayToggle.checked,
+                    quality: qualitySelect.value,
+                    volume: volumeSlider.value,
+                    darkMode: darkModeToggle.checked,
+                    showChannelNumbers: channelNumbersToggle.checked
+                };
+                localStorage.setItem('settings', JSON.stringify(newSettings));
+                updateStorageInfo();
+            }
+
+            // Event Listeners
+            backButton.addEventListener('click', () => {
+                window.history.back();
+            });
+
+            autoPlayToggle.addEventListener('change', saveSettings);
+            qualitySelect.addEventListener('change', saveSettings);
+            volumeSlider.addEventListener('input', saveSettings);
+
+            darkModeToggle.addEventListener('change', () => {
+                document.body.classList.toggle('dark-mode');
+                saveSettings();
+            });
+
+            channelNumbersToggle.addEventListener('change', saveSettings);
+
+            clearCacheBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear cache?')) {
+                    // Clear cache implementation
+                    alert('Cache cleared successfully');
+                    updateStorageInfo();
+                }
+            });
+
+            clearDataBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                    localStorage.clear();
+                    alert('All data has been cleared. The app will now reload.');
+                    window.location.reload();
+                }
+            });
+
+            // Initialize storage info
+            updateStorageInfo();
+        });
+    </script>
+</body>
+</html>
