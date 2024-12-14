@@ -3,671 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Live TV</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Live TV Streaming App</title>
     <style>
-        /* Base Styles */
         :root {
-            --primary-color: #2196F3;
-            --secondary-color: #1976D2;
-            --danger-color: #dc3545;
-            --background-color: #f8f9fa;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --text-light: #666666;
-            --border-radius: 12px;
-            --shadow: 0 2px 10px rgba(0,0,0,0.1);
-            --transition: all 0.3s ease;
-        }
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --background-color: #f4f4f4;
+    --text-color: #333;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
 
-        /* Header Styles */
-        .main-header {
-            background: linear-gradient(135deg, #1a1a1a, #2c3e50);
-            padding: 1rem 2rem;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: var(--shadow);
-        }
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+/* Header Styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
 
-        .logo-img {
-            height: 40px;
-            width: 40px;
-            object-fit: contain;
-        }
+.logo {
+    display: flex;
+    align-items: center;
+}
 
-        .header-buttons {
-            display: flex;
-            gap: 15px;
-        }
+.logo img {
+    margin-right: 10px;
+    border-radius: 50%;
+}
 
-        .header-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition);
-        }
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
 
-        .header-btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
-        }
+.icon-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
 
-        /* Main Content Styles */
-        .main-content {
-            margin-top: 80px;
-            padding: 2rem;
-            flex: 1;
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
-            width: 100%;
-        }
+.icon-btn:hover {
+    color: var(--secondary-color);
+}
 
-        .welcome-section {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: var(--card-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
+/* Playlists Grid */
+.playlists-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
 
-        .welcome-section h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
+.playlist-card {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
 
-        .welcome-section p {
-            color: var(--text-light);
-            font-size: 1.1rem;
-        }
+.playlist-card:hover {
+    transform: scale(1.05);
+}
 
-        /* Playlist Grid */
-        .playlist-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 1rem;
-        }
+.playlist-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
 
-        .playlist-card {
-            background: var(--card-color);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
+.playlist-info {
+    padding: 15px;
+}
 
-        .playlist-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        }
+.playlist-info h3 {
+    margin-bottom: 5px;
+}
 
-        .playlist-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
 
-        .playlist-empty {
-            text-align: center;
-            padding: 2rem;
-            background: rgba(255,255,255,0.9);
-            border-radius: var(--border-radius);
-            margin: 2rem 0;
-            grid-column: 1 / -1;
-        }
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+}
 
-        .playlist-empty i {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
+.close-modal {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
 
-        .playlist-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
+/* Footer Styles */
+footer {
+    margin-top: 30px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
 
-        .playlist-url {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin: 10px 0;
-            word-break: break-all;
-        }
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+#clear-data-btn {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-        .btn.primary {
-            background: var(--primary-color);
-            color: white;
-        }
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .playlists-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
 
-        .btn.secondary {
-            background: #eee;
-            color: var(--text-color);
-        }
+    .footer-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
 
-        .btn.danger {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 500px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            padding: 1.5rem;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-
-        /* Form Styles */
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 0.8rem;
-            border: 2px solid #eee;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .input-field:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-
-        .file-input {
-            width: 100%;
-            padding: 0.8rem;
-            background: #f8f9fa;
-            border: 2px dashed #ddd;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-        }
-
-        /* Confirmation Modal */
-        .confirmation-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            z-index: 2001;
-            display: none;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .confirmation-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: flex-end;
-        }
-
-        /* Notification */
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary-color);
-            color: white;
-            padding: 15px 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: var(--transition);
-            z-index: 3000;
-        }
-
-        .notification.error {
-            background: var(--danger-color);
-        }
-
-        .notification.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .main-header {
-                padding: 1rem;
-            }
-
-            .header-btn span {
-                display: none;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .playlist-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .welcome-section {
-                padding: 1.5rem;
-            }
-
-            .welcome-section h2 {
-                font-size: 1.5rem;
-            }
-
-            .modal-content {
-                width: 95%;
-            }
-
-            .playlist-actions {
-                flex-wrap: wrap;
-            }
-
-            .btn {
-                flex: 1;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo-container h1 {
-                font-size: 1.2rem;
-            }
-
-            .modal-header,
-            .modal-body,
-            .modal-footer {
-                padding: 1rem;
-            }
-
-            .btn {
-                padding: 8px 12px;
-                font-size: 0.9rem;
-            }
-        }
+        
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
-    <header class="main-header">
-        <div class="logo-container">
-            <img src="assets/images/logo.png" alt="Premium TV Logo" class="logo-img">
-            <h1>Premium Live TV</h1>
-        </div>
-        <div class="header-buttons">
-            <button class="header-btn" id="addPlaylistBtn">
-                <i class="fas fa-plus"></i>
-                <span>Add Playlist</span>
-            </button>
-            <button class="header-btn" onclick="location.href='settings.html'">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
-            </button>
-        </div>
-    </header>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <img src="/api/placeholder/50/50" alt="App Logo">
+                <h1>LiveStream</h1>
+            </div>
+            <div class="header-actions">
+                <button id="add-playlist-btn" class="icon-btn">
+                    <i class="ri-add-line"></i>
+                </button>
+                <button id="settings-btn" class="icon-btn">
+                    <i class="ri-settings-3-line"></i>
+                </button>
+            </div>
+        </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="welcome-section">
-            <h2>Welcome to Premium Live TV</h2>
-            <p>Start by adding your M3U playlist to watch your favorite channels</p>
-        </div>
-
-        <div class="playlist-grid" id="playlistGrid">
-            <!-- Playlists will be added here dynamically -->
-        </div>
-    </main>
-
-    <!-- Add/Edit Playlist Modal -->
-    <div class="modal" id="playlistModal">
-        <div class="modal-content">
-            <div class="modal-header">
+        <!-- Add Playlist Modal -->
+        <div id="add-playlist-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
                 <h2>Add New Playlist</h2>
-                <button class="close-btn" id="closeModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <label for="playlistName">Playlist Name</label>
-                    <input type="text" id="playlistName" class="input-field" placeholder="Enter playlist name">
-                </div>
-                <div class="input-group">
-                    <label for="m3uUrl">M3U URL</label>
-                    <input type="text" id="m3uUrl" class="input-field" placeholder="Enter M3U playlist URL">
-                </div>
-                <div class="input-group">
-                    <label for="m3uFile">Or Upload M3U File</label>
-                    <input type="file" id="m3uFile" class="file-input" accept=".m3u,.m3u8">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn secondary" id="cancelBtn">Cancel</button>
-                <button class="btn primary" id="addBtn">Add Playlist</button>
+                <input type="text" id="playlist-name" placeholder="Playlist Name">
+                <input type="file" id="playlist-file" accept=".m3u">
+                <input type="url" id="playlist-url" placeholder="M3U Playlist URL">
+                <button id="save-playlist">Save Playlist</button>
             </div>
         </div>
-    </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="confirmation-modal" id="confirmationModal">
-        <h3>Delete Playlist?</h3>
-        <p>Are you sure you want to delete this playlist? This action cannot be undone.</p>
-        <div class="confirmation-buttons">
-            <button class="btn secondary" onclick="closeConfirmation()">Cancel</button>
-            <button class="btn danger" onclick="confirmDelete()">Delete</button>
-        </div>
+        <!-- Playlists Container -->
+        <main class="playlists-container" id="playlists-grid">
+            <!-- Default Playlists -->
+            <div class="playlist-card">
+                <img src="/api/placeholder/200/150" alt="Playlist Thumbnail">
+                <div class="playlist-info">
+                    <h3>Sports Channels</h3>
+                    <p>15 Channels</p>
+                </div>
+            </div>
+            <div class="playlist-card">
+                <img src="/api/placeholder/200/150" alt="Playlist Thumbnail">
+                <div class="playlist-info">
+                    <h3>News Channels</h3>
+                    <p>10 Channels</p>
+                </div>
+            </div>
+            <div class="playlist-card">
+                <img src="/api/placeholder/200/150" alt="Playlist Thumbnail">
+                <div class="playlist-info">
+                    <h3>Entertainment</h3>
+                    <p>20 Channels</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <button id="clear-data-btn">Clear Data</button>
+                <div class="developer-info">
+                    <p>Developed by: StreamMaster Team</p>
+                    <p>&copy; 2024 LiveStream App</p>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize variables
-            const modal = document.getElementById('playlistModal');
-            const addPlaylistBtn = document.getElementById('addPlaylistBtn');
-            const closeModal = document.getElementById('closeModal');
-            const cancelBtn = document.getElementById('cancelBtn');
-            const addBtn = document.getElementById('addBtn');
-            const playlistGrid = document.getElementById('playlistGrid');
-            let currentEditId = null;
-            let deletePlaylistId = null;
+    const addPlaylistBtn = document.getElementById('add-playlist-btn');
+    const addPlaylistModal = document.getElementById('add-playlist-modal');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const savePlaylistBtn = document.getElementById('save-playlist');
+    const playlistsGrid = document.getElementById('playlists-grid');
+    const settingsBtn = document.getElementById('settings-btn');
+    const clearDataBtn = document.getElementById('clear-data-btn');
 
-            // Load existing playlists
-            loadPlaylists();
+    // Modal functionality
+    addPlaylistBtn.addEventListener('click', () => {
+        addPlaylistModal.style.display = 'block';
+    });
 
-            // Event Listeners
-            addPlaylistBtn.addEventListener('click', () => {
-                currentEditId = null;
-                clearForm();
-                document.querySelector('.modal-header h2').textContent = 'Add New Playlist';
-                addBtn.textContent = 'Add Playlist';
-                modal.style.display = 'block';
+    closeModalBtn.addEventListener('click', () => {
+        addPlaylistModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === addPlaylistModal) {
+            addPlaylistModal.style.display = 'none';
+        }
+    });
+
+    // Save Playlist
+    savePlaylistBtn.addEventListener('click', () => {
+        const playlistName = document.getElementById('playlist-name').value;
+        const playlistFile = document.getElementById('playlist-file').files[0];
+        const playlistUrl = document.getElementById('playlist-url').value;
+
+        if (playlistName && (playlistFile || playlistUrl)) {
+            const newPlaylistCard = document.createElement('div');
+            newPlaylistCard.classList.add('playlist-card');
+            newPlaylistCard.innerHTML = `
+                <img src="/api/placeholder/200/150" alt="Playlist Thumbnail">
+                <div class="playlist-info">
+                    <h3>${playlistName}</h3>
+                    <p>Source: ${playlistFile ? playlistFile.name : playlistUrl}</p>
+                </div>
+            `;
+
+            newPlaylistCard.addEventListener('click', () => {
+                window.location.href = 'video.html';
             });
 
-            closeModal.addEventListener('click', () => closeModal());
-            cancelBtn.addEventListener('click', () => closeModal());
-            addBtn.addEventListener('click', savePlaylist);
+            playlistsGrid.appendChild(newPlaylistCard);
+            addPlaylistModal.style.display = 'none';
+        } else {
+            alert('Please provide a playlist name and either a file or URL');
+        }
+    });
 
-            // Close modal when clicking outside
-            window.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
+    // Navigate to Settings
+    settingsBtn.addEventListener('click', () => {
+        window.location.href = 'settings.html';
+    });
 
-            // Functions
-            function loadPlaylists() {
-                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
-                playlistGrid.innerHTML = '';
+    // Clear Data
+    clearDataBtn.addEventListener('click', () => {
+        const defaultPlaylists = document.querySelectorAll('.playlist-card:nth-child(-n+3)');
+        const userPlaylists = document.querySelectorAll('.playlist-card:nth-child(n+4)');
 
-                if (playlists.length === 0) {
-                    playlistGrid.innerHTML = `
-                        <div class="playlist-empty">
-                            <i class="fas fa-tv"></i>
-                            <h3>No Playlists Added</h3>
-                            <p>Click the "Add Playlist" button to get started</p>
-                        </div>
-                    `;
-                    return;
-                }
+        userPlaylists.forEach(playlist => playlist.remove());
+        alert('User-added playlists have been cleared.');
+    });
 
-                playlists.forEach(playlist => {
-                    const card = createPlaylistCard(playlist);
-                    playlistGrid.appendChild(card);
-                });
-            }
-
-            function createPlaylistCard(playlist) {
-                const card = document.createElement('div');
-                card.className = 'playlist-card';
-                card.innerHTML = `
-                    <h3>${playlist.name}</h3>
-                    <p class="playlist-url">${playlist.url.substring(0, 50)}${playlist.url.length > 50 ? '...' : ''}</p>
-                    <div class="playlist-actions">
-                        <button class="btn secondary" onclick="editPlaylist('${playlist.id}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn primary" onclick="openPlaylist('${playlist.id}')">
-                            <i class="fas fa-play"></i> Watch
-                        </button>
-                        <button class="btn danger" onclick="deletePlaylist('${playlist.id}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
-                `;
-                return card;
-            }
-
-            window.editPlaylist = function(id) {
-                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
-                const playlist = playlists.find(p => p.id === id);
-                if (playlist) {
-                    currentEditId = id;
-                    document.getElementById('playlistName').value = playlist.name;
-                    document.getElementById('m3uUrl').value = playlist.url;
-                    document.querySelector('.modal-header h2').textContent = 'Edit Playlist';
-                    addBtn.textContent = 'Save Changes';
-                    modal.style.display = 'block';
-                }
-            };
-
-            window.deletePlaylist = function(id) {
-                deletePlaylistId = id;
-                document.getElementById('confirmationModal').style.display = 'block';
-            };
-
-            window.confirmDelete = function() {
-                if (deletePlaylistId) {
-                    const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
-                    const updatedPlaylists = playlists.filter(p => p.id !== deletePlaylistId);
-                    localStorage.setItem('playlists', JSON.stringify(updatedPlaylists));
-                    loadPlaylists();
-                    closeConfirmation();
-                    showNotification('Playlist deleted successfully');
-                }
-            };
-
-            window.closeConfirmation = function() {
-                document.getElementById('confirmationModal').style.display = 'none';
-                deletePlaylistId = null;
-            };
-
-            window.openPlaylist = function(id) {
-                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
-                const playlist = playlists.find(p => p.id === id);
-                if (playlist) {
-                    localStorage.setItem('currentPlaylist', JSON.stringify(playlist));
-                    window.location.href = 'video.html';
-                }
-            };
-
-            function savePlaylist() {
-                const name = document.getElementById('playlistName').value.trim();
-                const url = document.getElementById('m3uUrl').value.trim();
-                const file = document.getElementById('m3uFile').files[0];
-
-                if (!name) {
-                    showNotification('Please enter a playlist name', 'error');
-                    return;
-                }
-
-                if (!url && !file) {
-                    showNotification('Please provide either a URL or file', 'error');
-                    return;
-                }
-
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        savePlaylistData(name, e.target.result);
-                    };
-                    reader.readAsText(file);
-                } else {
-                    savePlaylistData(name, url);
-                }
-            }
-
-            function savePlaylistData(name, url) {
-                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
-                
-                if (currentEditId) {
-                    const index = playlists.findIndex(p => p.id === currentEditId);
-                    if (index !== -1) {
-                        playlists[index] = {
-                            ...playlists[index],
-                            name: name,
-                            url: url,
-                            dateModified: new Date().toISOString()
-                        };
-                    }
-                } else {
-                    playlists.push({
-                        id: Date.now().toString(),
-                        name: name,
-                        url: url,
-                        dateAdded: new Date().toISOString()
-                    });
-                }
-
-                localStorage.setItem('playlists', JSON.stringify(playlists));
-                closeModal();
-                loadPlaylists();
-                showNotification(currentEditId ? 'Playlist updated successfully' : 'Playlist added successfully');
-            }
-
-            function closeModal() {
-                modal.style.display = 'none';
-                clearForm();
-                currentEditId = null;
-            }
-
-            function clearForm() {
-                document.getElementById('playlistName').value = '';
-                document.getElementById('m3uUrl').value = '';
-                document.getElementById('m3uFile').value = '';
-            }
-
-            function showNotification(message, type = 'success') {
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                notification.textContent = message;
-                document.body.appendChild(notification);
-
-                setTimeout(() => {
-                    notification.classList.add('show');
-                    setTimeout(() => {
-                        notification.classList.remove('show');
-                        setTimeout(() => notification.remove(), 300);
-                    }, 3000);
-                }, 100);
-            }
+    // Add click event to default playlists
+    const defaultPlaylistCards = document.querySelectorAll('.playlist-card');
+    defaultPlaylistCards.forEach(card => {
+        card.addEventListener('click', () => {
+            window.location.href = 'video.html';
         });
+    });
+});
+        
+
+        
     </script>
 </body>
 </html>
-
