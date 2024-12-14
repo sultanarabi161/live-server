@@ -4,339 +4,402 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Live TV</title>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-    <style> 
-    /* Main Styles */
-:root {
-    --primary-color: #2196F3;
-    --secondary-color: #1976D2;
-    --accent-color: #FFC107;
-    --background-color: #f8f9fa;
-    --card-color: #ffffff;
-    --text-color: #333333;
-    --text-light: #666666;
-    --border-radius: 12px;
-    --transition: all 0.3s ease;
-    --shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #1976D2;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --text-light: #666666;
+            --border-radius: 12px;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
-}
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-body {
-    background: var(--background-color);
-    color: var(--text-color);
-    line-height: 1.6;
-    min-height: 100vh;
-}
+        /* Header Styles */
+        .main-header {
+            background: linear-gradient(135deg, #1a1a1a, #2c3e50);
+            padding: 1rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
 
-/* Header Styles */
-header {
-    background: linear-gradient(135deg, #1a1a1a, #2c3e50);
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-    box-shadow: var(--shadow);
-}
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-} 
+        .logo-img {
+            height: 40px;
+            width: 40px;
+            object-fit: contain;
+        }
 
-.logo img {
-    height: 45px;
-    border-radius: 8px;
-}
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+        }
 
-.logo h1 {
-    color: white;
-    font-size: 1.8rem;
-    font-weight: 600;
-}
+        .header-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
 
-.header-actions {
-    display: flex;
-    gap: 15px;
-}
+        .header-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
 
-.header-btn {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    padding: 10px 15px;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: var(--transition);
-}
+        /* Main Content Styles */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            flex: 1;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
 
-.header-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-2px);
-}
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
 
-/* Main Content */
-.main-content {
-    margin-top: 80px;
-    padding: 20px;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-}
+        .welcome-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
 
-/* Grid Layout */
-.playlist-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px;
-    margin-top: 30px;
-}
+        .welcome-section p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
 
-/* Card Styles */
-.playlist-card {
-    background: var(--card-color);
-    border-radius: var(--border-radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-}
+        /* Playlist Grid */
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
 
-.playlist-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-}
+        .playlist-card {
+            background: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
 
-.playlist-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
+        .playlist-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
 
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(5px);
-    z-index: 2000;
-}
+        .playlist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
 
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: var(--border-radius);
-    width: 90%;
-    max-width: 600px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
+        .playlist-empty {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255,255,255,0.9);
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
+            grid-column: 1 / -1;
+        }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
+        .playlist-empty i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
 
-.input-group {
-    margin-bottom: 20px;
-}
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+        }
 
-.input-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-}
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
 
-.input-field {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #eee;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    transition: var(--transition);
-}
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.input-field:focus {
-    border-color: var(--primary-color);
-    outline: none;
-}
+        .modal-body {
+            padding: 1.5rem;
+        }
 
-/* Button Styles */
-.btn {
-    padding: 12px 25px;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 500;
-    transition: var(--transition);
-}
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
 
-.btn.primary {
-    background: var(--primary-color);
-    color: white;
-}
+        /* Form Styles */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
 
-.btn.secondary {
-    background: #eee;
-    color: var(--text-color);
-}
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
 
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+        .input-field {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #eee;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
 
-/* Footer Styles */
-footer {
-    background: linear-gradient(135deg, #1a1a1a, #2c3e50);
-    color: white;
-    padding: 40px 20px 20px;
-    margin-top: 50px;
-}
+        .input-field:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
 
-.footer-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-}
+        .file-input {
+            width: 100%;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+        }
 
-.footer-section {
-    padding: 20px;
-}
+        /* Button Styles */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
 
-.footer-section h3 {
-    margin-bottom: 15px;
-    position: relative;
-    padding-bottom: 10px;
-}
+        .btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
 
-.footer-section h3::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 50px;
-    height: 3px;
-    background: var(--primary-color);
-}
+        .btn.secondary {
+            background: #eee;
+            color: var(--text-color);
+        }
 
-.footer-section ul {
-    list-style: none;
-}
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
 
-.footer-section ul li {
-    margin-bottom: 10px;
-}
+        /* Footer Styles */
+        .main-footer {
+            background: linear-gradient(135deg, #1a1a1a, #2c3e50);
+            color: white;
+            padding: 3rem 2rem 1.5rem;
+            margin-top: auto;
+        }
 
-.footer-section a {
-    color: #fff;
-    text-decoration: none;
-    transition: var(--transition);
-}
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
 
-.footer-section a:hover {
-    color: var(--primary-color);
-    padding-left: 5px;
-}
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
 
-.footer-bottom {
-    text-align: center;
-    padding-top: 20px;
-    margin-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary-color);
+        }
 
-/* Notifications */
-.notification {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--primary-color);
-    color: white;
-    padding: 15px 25px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    transform: translateY(100px);
-    opacity: 0;
-    transition: var(--transition);
-}
+        .footer-section ul {
+            list-style: none;
+        }
 
-.notification.show {
-    transform: translateY(0);
-    opacity: 1;
-}
+        .footer-section ul li {
+            margin-bottom: 0.8rem;
+        }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .logo h1 {
-        font-size: 1.5rem;
-    }
+        .footer-section a {
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
 
-    .header-btn span {
-        display: none;
-    }
+        .footer-section a:hover {
+            color: var(--primary-color);
+            padding-left: 5px;
+        }
 
-    .playlist-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
 
-    .modal-content {
-        width: 95%;
-        padding: 20px;
-    }
-}
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 3000;
+        }
 
-@media (max-width: 480px) {
-    .playlist-grid {
-        grid-template-columns: 1fr;
-    }
+        .notification.error {
+            background: #dc3545;
+        }
 
-    .footer-content {
-        grid-template-columns: 1fr;
-    }
-}
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 1rem;
+            }
+
+            .header-btn span {
+                display: none;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .playlist-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-container h1 {
+                font-size: 1.2rem;
+            }
+
+            .welcome-section h2 {
+                font-size: 1.5rem;
+            }
+
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="assets/images/logo.png" alt="Premium TV Logo">
+    <!-- Header -->
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="assets/images/logo.png" alt="Premium TV Logo" class="logo-img">
             <h1>Premium Live TV</h1>
         </div>
-        <div class="header-actions">
+        <div class="header-buttons">
             <button class="header-btn" id="addPlaylistBtn">
                 <i class="fas fa-plus"></i>
                 <span>Add Playlist</span>
@@ -348,8 +411,18 @@ footer {
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="main-content">
-        <div class="playlist-grid" id="playlistGrid"></div>
+        <!-- Welcome Message -->
+        <div class="welcome-section">
+            <h2>Welcome to Premium Live TV</h2>
+            <p>Start by adding your M3U playlist to watch your favorite channels</p>
+        </div>
+
+        <!-- Playlists Grid -->
+        <div class="playlist-grid" id="playlistGrid">
+            <!-- Dynamic content will be added here -->
+        </div>
     </main>
 
     <!-- Add Playlist Modal -->
@@ -361,16 +434,16 @@ footer {
             </div>
             <div class="modal-body">
                 <div class="input-group">
-                    <label>Playlist Name</label>
-                    <input type="text" id="playlistName" placeholder="Enter playlist name">
+                    <label for="playlistName">Playlist Name</label>
+                    <input type="text" id="playlistName" class="input-field" placeholder="Enter playlist name">
                 </div>
                 <div class="input-group">
-                    <label>M3U URL</label>
-                    <input type="text" id="m3uUrl" placeholder="Enter M3U playlist URL">
+                    <label for="m3uUrl">M3U URL</label>
+                    <input type="text" id="m3uUrl" class="input-field" placeholder="Enter M3U playlist URL">
                 </div>
                 <div class="input-group">
-                    <label>Or Upload M3U File</label>
-                    <input type="file" id="m3uFile" accept=".m3u,.m3u8">
+                    <label for="m3uFile">Or Upload M3U File</label>
+                    <input type="file" id="m3uFile" class="file-input" accept=".m3u,.m3u8">
                 </div>
             </div>
             <div class="modal-footer">
@@ -380,7 +453,8 @@ footer {
         </div>
     </div>
 
-    <footer>
+    <!-- Footer -->
+    <footer class="main-footer">
         <div class="footer-content">
             <div class="footer-section">
                 <h3>About</h3>
@@ -399,6 +473,177 @@ footer {
         </div>
     </footer>
 
-    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize variables
+            const modal = document.getElementById('playlistModal');
+            const addPlaylistBtn = document.getElementById('addPlaylistBtn');
+            const closeModal = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const addBtn = document.getElementById('addBtn');
+            const playlistGrid = document.getElementById('playlistGrid');
+            const clearDataBtn = document.getElementById('clearData');
+
+            // Load existing playlists
+            loadPlaylists();
+
+            // Event Listeners
+            addPlaylistBtn.addEventListener('click', () => {
+                modal.style.display = 'block';
+            });
+
+            closeModal.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            addBtn.addEventListener('click', addNewPlaylist);
+
+            clearDataBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('Are you sure you want to clear all data?')) {
+                    localStorage.clear();
+                    loadPlaylists();
+                    showNotification('All data cleared successfully');
+                }
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // Functions
+            function loadPlaylists() {
+                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+                playlistGrid.innerHTML = '';
+
+                if (playlists.length === 0) {
+                    playlistGrid.innerHTML = `
+                        <div class="playlist-empty">
+                            <i class="fas fa-tv"></i>
+                            <h3>No Playlists Added</h3>
+                            <p>Click the "Add Playlist" button to get started</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                playlists.forEach(playlist => {
+                    const card = createPlaylistCard(playlist);
+                    playlistGrid.appendChild(card);
+                });
+            }
+
+            function createPlaylistCard(playlist) {
+                const card = document.createElement('div');
+                card.className = 'playlist-card';
+                card.innerHTML = `
+                    <h3>${playlist.name}</h3>
+                    <p class="playlist-url">${playlist.url.substring(0, 50)}...</p>
+                    <div class="playlist-actions">
+                        <button class="btn secondary" onclick="editPlaylist('${playlist.id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn primary" onclick="openPlaylist('${playlist.id}')">
+                            <i class="fas fa-play"></i> Watch
+                        </button>
+                    </div>
+                `;
+                return card;
+            }
+
+            function addNewPlaylist() {
+                const name = document.getElementById('playlistName').value.trim();
+                const url = document.getElementById('m3uUrl').value.trim();
+                const file = document.getElementById('m3uFile').files[0];
+
+                if (!name) {
+                    showNotification('Please enter a playlist name', 'error');
+                    return;
+                }
+
+                if (!url && !file) {
+                    showNotification('Please provide either a URL or file', 'error');
+                    return;
+                }
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        savePlaylist(name, e.target.result);
+                    };
+                    reader.readAsText(file);
+                } else {
+                    savePlaylist(name, url);
+                }
+            }
+
+            function savePlaylist(name, url) {
+                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+                const newPlaylist = {
+                    id: Date.now().toString(),
+                    name: name,
+                    url: url,
+                    dateAdded: new Date().toISOString()
+                };
+
+                playlists.push(newPlaylist);
+                localStorage.setItem('playlists', JSON.stringify(playlists));
+
+                modal.style.display = 'none';
+                loadPlaylists();
+                showNotification('Playlist added successfully');
+                clearForm();
+            }
+
+            function clearForm() {
+                document.getElementById('playlistName').value = '';
+                document.getElementById('m3uUrl').value = '';
+                document.getElementById('m3uFile').value = '';
+            }
+
+            function showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.classList.add('show');
+                    setTimeout(() => {
+                        notification.classList.remove('show');
+                        setTimeout(() => notification.remove(), 300);
+                    }, 3000);
+                }, 100);
+            }
+
+            // Global functions for playlist operations
+            window.editPlaylist = function(id) {
+                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+                const playlist = playlists.find(p => p.id === id);
+                if (playlist) {
+                    document.getElementById('playlistName').value = playlist.name;
+                    document.getElementById('m3uUrl').value = playlist.url;
+                    modal.style.display = 'block';
+                    // TODO: Implement edit functionality
+                }
+            };
+
+            window.openPlaylist = function(id) {
+                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+                const playlist = playlists.find(p => p.id === id);
+                if (playlist) {
+                    localStorage.setItem('currentPlaylist', JSON.stringify(playlist));
+                    window.location.href = 'video.html';
+                }
+            };
+        });
+    </script>
 </body>
 </html>
