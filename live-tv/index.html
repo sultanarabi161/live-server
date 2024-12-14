@@ -6,17 +6,11 @@
     <title>Premium Live TV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
+        /* Base Styles */
         :root {
             --primary-color: #2196F3;
             --secondary-color: #1976D2;
+            --danger-color: #dc3545;
             --background-color: #f8f9fa;
             --card-color: #ffffff;
             --text-color: #333333;
@@ -24,6 +18,13 @@
             --border-radius: 12px;
             --shadow: 0 2px 10px rgba(0,0,0,0.1);
             --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         body {
@@ -99,11 +100,16 @@
         .welcome-section {
             text-align: center;
             margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--card-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
         }
 
         .welcome-section h2 {
             font-size: 2rem;
             margin-bottom: 1rem;
+            color: var(--primary-color);
         }
 
         .welcome-section p {
@@ -124,7 +130,6 @@
             border-radius: var(--border-radius);
             padding: 1.5rem;
             box-shadow: var(--shadow);
-            cursor: pointer;
             transition: var(--transition);
             position: relative;
             overflow: hidden;
@@ -158,6 +163,51 @@
             font-size: 3rem;
             color: var(--primary-color);
             margin-bottom: 1rem;
+        }
+
+        .playlist-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .playlist-url {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn.secondary {
+            background: #eee;
+            color: var(--text-color);
+        }
+
+        .btn.danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         /* Modal Styles */
@@ -239,97 +289,37 @@
             cursor: pointer;
         }
 
-        /* Button Styles */
-        .btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
+        /* Confirmation Modal */
+        .confirmation-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
             border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
+            box-shadow: var(--shadow);
+            z-index: 2001;
+            display: none;
+            width: 90%;
+            max-width: 400px;
         }
 
-        .btn.primary {
-            background: var(--primary-color);
-            color: white;
+        .confirmation-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
         }
 
-        .btn.secondary {
-            background: #eee;
-            color: var(--text-color);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        /* Footer Styles */
-        .main-footer {
-            background: linear-gradient(135deg, #1a1a1a, #2c3e50);
-            color: white;
-            padding: 3rem 2rem 1.5rem;
-            margin-top: auto;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-        }
-
-        .footer-section h3 {
-            margin-bottom: 1rem;
-            position: relative;
-            padding-bottom: 0.5rem;
-        }
-
-        .footer-section h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50px;
-            height: 3px;
-            background: var(--primary-color);
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section ul li {
-            margin-bottom: 0.8rem;
-        }
-
-        .footer-section a {
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-section a:hover {
-            color: var(--primary-color);
-            padding-left: 5px;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
-            margin-top: 2rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* Notification Styles */
+        /* Notification */
         .notification {
             position: fixed;
             bottom: 20px;
             right: 20px;
             background: var(--primary-color);
             color: white;
-            padding: 1rem 2rem;
+            padding: 15px 25px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             transform: translateY(100px);
@@ -339,7 +329,7 @@
         }
 
         .notification.error {
-            background: #dc3545;
+            background: var(--danger-color);
         }
 
         .notification.show {
@@ -366,12 +356,25 @@
                 gap: 1rem;
             }
 
+            .welcome-section {
+                padding: 1.5rem;
+            }
+
+            .welcome-section h2 {
+                font-size: 1.5rem;
+            }
+
             .modal-content {
                 width: 95%;
             }
 
-            .footer-content {
-                grid-template-columns: 1fr;
+            .playlist-actions {
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
             }
         }
 
@@ -380,14 +383,15 @@
                 font-size: 1.2rem;
             }
 
-            .welcome-section h2 {
-                font-size: 1.5rem;
-            }
-
             .modal-header,
             .modal-body,
             .modal-footer {
                 padding: 1rem;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -413,19 +417,17 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Welcome Message -->
         <div class="welcome-section">
             <h2>Welcome to Premium Live TV</h2>
             <p>Start by adding your M3U playlist to watch your favorite channels</p>
         </div>
 
-        <!-- Playlists Grid -->
         <div class="playlist-grid" id="playlistGrid">
-            <!-- Dynamic content will be added here -->
+            <!-- Playlists will be added here dynamically -->
         </div>
     </main>
 
-    <!-- Add Playlist Modal -->
+    <!-- Add/Edit Playlist Modal -->
     <div class="modal" id="playlistModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -453,25 +455,15 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="main-footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>About</h3>
-                <p>Premium Live TV brings you the best streaming experience.</p>
-            </div>
-            <div class="footer-section">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="settings.html">Settings</a></li>
-                    <li><a href="#" id="clearData">Clear Data</a></li>
-                </ul>
-            </div>
+    <!-- Delete Confirmation Modal -->
+    <div class="confirmation-modal" id="confirmationModal">
+        <h3>Delete Playlist?</h3>
+        <p>Are you sure you want to delete this playlist? This action cannot be undone.</p>
+        <div class="confirmation-buttons">
+            <button class="btn secondary" onclick="closeConfirmation()">Cancel</button>
+            <button class="btn danger" onclick="confirmDelete()">Delete</button>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Premium Live TV. All rights reserved.</p>
-        </div>
-    </footer>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -482,39 +474,29 @@
             const cancelBtn = document.getElementById('cancelBtn');
             const addBtn = document.getElementById('addBtn');
             const playlistGrid = document.getElementById('playlistGrid');
-            const clearDataBtn = document.getElementById('clearData');
+            let currentEditId = null;
+            let deletePlaylistId = null;
 
             // Load existing playlists
             loadPlaylists();
 
             // Event Listeners
             addPlaylistBtn.addEventListener('click', () => {
+                currentEditId = null;
+                clearForm();
+                document.querySelector('.modal-header h2').textContent = 'Add New Playlist';
+                addBtn.textContent = 'Add Playlist';
                 modal.style.display = 'block';
             });
 
-            closeModal.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            cancelBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            addBtn.addEventListener('click', addNewPlaylist);
-
-            clearDataBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (confirm('Are you sure you want to clear all data?')) {
-                    localStorage.clear();
-                    loadPlaylists();
-                    showNotification('All data cleared successfully');
-                }
-            });
+            closeModal.addEventListener('click', () => closeModal());
+            cancelBtn.addEventListener('click', () => closeModal());
+            addBtn.addEventListener('click', savePlaylist);
 
             // Close modal when clicking outside
             window.addEventListener('click', (e) => {
                 if (e.target === modal) {
-                    modal.style.display = 'none';
+                    closeModal();
                 }
             });
 
@@ -545,7 +527,7 @@
                 card.className = 'playlist-card';
                 card.innerHTML = `
                     <h3>${playlist.name}</h3>
-                    <p class="playlist-url">${playlist.url.substring(0, 50)}...</p>
+                    <p class="playlist-url">${playlist.url.substring(0, 50)}${playlist.url.length > 50 ? '...' : ''}</p>
                     <div class="playlist-actions">
                         <button class="btn secondary" onclick="editPlaylist('${playlist.id}')">
                             <i class="fas fa-edit"></i> Edit
@@ -553,12 +535,58 @@
                         <button class="btn primary" onclick="openPlaylist('${playlist.id}')">
                             <i class="fas fa-play"></i> Watch
                         </button>
+                        <button class="btn danger" onclick="deletePlaylist('${playlist.id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
                     </div>
                 `;
                 return card;
             }
 
-            function addNewPlaylist() {
+            window.editPlaylist = function(id) {
+                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+                const playlist = playlists.find(p => p.id === id);
+                if (playlist) {
+                    currentEditId = id;
+                    document.getElementById('playlistName').value = playlist.name;
+                    document.getElementById('m3uUrl').value = playlist.url;
+                    document.querySelector('.modal-header h2').textContent = 'Edit Playlist';
+                    addBtn.textContent = 'Save Changes';
+                    modal.style.display = 'block';
+                }
+            };
+
+            window.deletePlaylist = function(id) {
+                deletePlaylistId = id;
+                document.getElementById('confirmationModal').style.display = 'block';
+            };
+
+            window.confirmDelete = function() {
+                if (deletePlaylistId) {
+                    const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+                    const updatedPlaylists = playlists.filter(p => p.id !== deletePlaylistId);
+                    localStorage.setItem('playlists', JSON.stringify(updatedPlaylists));
+                    loadPlaylists();
+                    closeConfirmation();
+                    showNotification('Playlist deleted successfully');
+                }
+            };
+
+            window.closeConfirmation = function() {
+                document.getElementById('confirmationModal').style.display = 'none';
+                deletePlaylistId = null;
+            };
+
+            window.openPlaylist = function(id) {
+                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+                const playlist = playlists.find(p => p.id === id);
+                if (playlist) {
+                    localStorage.setItem('currentPlaylist', JSON.stringify(playlist));
+                    window.location.href = 'video.html';
+                }
+            };
+
+            function savePlaylist() {
                 const name = document.getElementById('playlistName').value.trim();
                 const url = document.getElementById('m3uUrl').value.trim();
                 const file = document.getElementById('m3uFile').files[0];
@@ -576,30 +604,46 @@
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        savePlaylist(name, e.target.result);
+                        savePlaylistData(name, e.target.result);
                     };
                     reader.readAsText(file);
                 } else {
-                    savePlaylist(name, url);
+                    savePlaylistData(name, url);
                 }
             }
 
-            function savePlaylist(name, url) {
+            function savePlaylistData(name, url) {
                 const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
-                const newPlaylist = {
-                    id: Date.now().toString(),
-                    name: name,
-                    url: url,
-                    dateAdded: new Date().toISOString()
-                };
+                
+                if (currentEditId) {
+                    const index = playlists.findIndex(p => p.id === currentEditId);
+                    if (index !== -1) {
+                        playlists[index] = {
+                            ...playlists[index],
+                            name: name,
+                            url: url,
+                            dateModified: new Date().toISOString()
+                        };
+                    }
+                } else {
+                    playlists.push({
+                        id: Date.now().toString(),
+                        name: name,
+                        url: url,
+                        dateAdded: new Date().toISOString()
+                    });
+                }
 
-                playlists.push(newPlaylist);
                 localStorage.setItem('playlists', JSON.stringify(playlists));
-
-                modal.style.display = 'none';
+                closeModal();
                 loadPlaylists();
-                showNotification('Playlist added successfully');
+                showNotification(currentEditId ? 'Playlist updated successfully' : 'Playlist added successfully');
+            }
+
+            function closeModal() {
+                modal.style.display = 'none';
                 clearForm();
+                currentEditId = null;
             }
 
             function clearForm() {
@@ -622,28 +666,8 @@
                     }, 3000);
                 }, 100);
             }
-
-            // Global functions for playlist operations
-            window.editPlaylist = function(id) {
-                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
-                const playlist = playlists.find(p => p.id === id);
-                if (playlist) {
-                    document.getElementById('playlistName').value = playlist.name;
-                    document.getElementById('m3uUrl').value = playlist.url;
-                    modal.style.display = 'block';
-                    // TODO: Implement edit functionality
-                }
-            };
-
-            window.openPlaylist = function(id) {
-                const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
-                const playlist = playlists.find(p => p.id === id);
-                if (playlist) {
-                    localStorage.setItem('currentPlaylist', JSON.stringify(playlist));
-                    window.location.href = 'video.html';
-                }
-            };
         });
     </script>
 </body>
 </html>
+
