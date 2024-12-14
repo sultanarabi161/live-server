@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Live TV</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #f8f9fa;
+            --text-color: #202124;
+            --border-color: #dadce0;
+            --hover-color: #f1f3f4;
+            --switch-active: #1a73e8;
+            --switch-inactive: #ccc;
+            --dark-bg: #202124;
+            --dark-secondary: #303134;
+            --dark-text: #ffffff;
+            --dark-border: #5f6368;
+        }
+
+        body {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            --secondary-color: var(--dark-bg);
+            --text-color: var(--dark-text);
+            --border-color: var(--dark-border);
+            --hover-color: var(--dark-secondary);
+        }
+
+        .header {
+            background: #fff;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+
+        .dark-mode .header {
+            background: var(--dark-secondary);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 50%;
+            color: var(--primary-color);
+            cursor: pointer;
+            margin-right: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .main-content {
+            max-width: 800px;
+            margin: 80px auto 0;
+            padding: 1rem;
+        }
+
+        .settings-section {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .settings-section {
+            background: var(--dark-secondary);
+        }
+
+        .section-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .setting-item {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info {
+            flex-grow: 1;
+        }
+
+        .setting-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: var(--text-color);
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+
+        .dark-mode .setting-description {
+            color: #9aa0a6;
+        }
+
+        /* Custom Switch Styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--switch-inactive);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--switch-active);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Select Styling */
+        .setting-select {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--secondary-color);
+            color: var(--text-color);
+            min-width: 150px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .setting-select {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .setting-select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* About Section */
+        .about-content {
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .app-version {
+            font-size: 0.9rem;
+            color: #5f6368;
+            margin: 0.5rem 0;
+        }
+
+        .dark-mode .app-version {
+            color: #9aa0a6;
+        }
+
+        .developer-info {
+            margin: 1rem 0;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-link:hover {
+            color: #1557b0;
+        }
+
+        /* Cache Info */
+        .cache-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--hover-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .cache-size {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .clear-cache-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .clear-cache-btn:hover {
+            background: #1557b0;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: #323232;
+            color: white;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0.5rem;
+            }
+
+            .settings-section {
+                border-radius: 8px;
+            }
+
+            .setting-select {
+                min-width: 120px;
+            }
+
+            .about-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+
+    <header class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="header-title">Settings</h1>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="settings-section">
+            <div class="section-header">Player Settings</div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Default Player</div>
+                    <div class="setting-description">Choose your preferred video player</div>
+                </div>
+                <select class="setting-select" id="playerSelect">
+                    <option value="html5">HTML5 Player</option>
+                    <option value="hls">HLS.js Player</option>
+                    <option value="plyr">Plyr.io Player</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Auto Play</div>
+                    <div class="setting-description">Automatically play videos when selected</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="autoPlayToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Default Quality</div>
+                    <div class="setting-description">Set preferred video quality</div>
+                </div>
+                <select class="setting-select" id="qualitySelect">
+                    <option value="auto">Auto</option>
+                    <option value="1080p">1080p</option>
+                    <option value="720p">720p</option>
+                    <option value="480p">480p</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="section-header">App Settings</div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Dark Mode</div>
+                    <div class="setting-description">Enable dark theme</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Notifications</div>
+                    <div class="setting-description">Enable push notifications</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="notificationsToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Cache Management</div>
+                    <div class="setting-description">Manage application cache</div>
+                </div>
+                <div class="cache-info">
+                    <div>Cache Size: <span class="cache-size" id="cacheSize">0 MB</span></div>
+                    <button class="clear-cache-btn" id="clearCacheBtn">Clear Cache</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="section-header">About</div>
+            <div class="about-content">
+                <h3>Live TV Streaming App</h3>
+                <div class="app-version">Version 2.0.0</div>
+                <div class="developer-info">
+                    <p>Developed by Your Name</p>
+                    <p>Email: developer@example.com</p>
+                </div>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // DOM Elements
+        const playerSelect = document.getElementById('playerSelect');
+        const autoPlayToggle = document.getElementById('autoPlayToggle');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const notificationsToggle = document.getElementById('notificationsToggle');
+        const clearCacheBtn = document.getElementById('clearCacheBtn');
+        const cacheSizeEl = document.getElementById('cacheSize');
+        const toast = document.getElementById('toast');
+
+        // Load saved settings
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('appSettings')) || {
+                player: 'html5',
+                autoPlay: true,
+                quality: 'auto',
+                darkMode: false,
+                notifications: false
+            };
+
+            playerSelect.value = settings.player;
+            autoPlayToggle.checked = settings.autoPlay;
+            qualitySelect.value = settings.quality;
+            darkModeToggle.checked = settings.darkMode;
+            notificationsToggle.checked = settings.notifications;
+
+            // Apply dark mode if enabled
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+
+            // Calculate and display cache size
+            calculateCacheSize();
+        }
+
+        // Save settings
+        function saveSettings() {
+            const settings = {
+                player: playerSelect.value,
+                autoPlay: autoPlayToggle.checked,
+                quality: qualitySelect.value,
+                darkMode: darkModeToggle.checked,
+                notifications: notificationsToggle.checked
+            };
+
+            localStorage.setItem('appSettings', JSON.stringify(settings));
+            showToast('Settings saved successfully');
+        }
+
+        // Calculate cache size
+        async function calculateCacheSize() {
+            if ('storage' in navigator && 'estimate' in navigator.storage) {
+                const estimate = await navigator.storage.estimate();
+                const size = Math.round(estimate.usage / (1024 * 1024));
+                cacheSizeEl.textContent = `${size} MB`;
+            }
+        }
+
+        // Clear cache
+        async function clearCache() {
+            try {
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                }
+                
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map(reg => reg.unregister()));
+                }
+
+                await calculateCacheSize();
+                showToast('Cache cleared successfully');
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                showToast('Failed to clear cache');
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, duration = 3000) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        // Event listeners
+        playerSelect.addEventListener('change', saveSettings);
+        autoPlayToggle.addEventListener('change', saveSettings);
+        qualitySelect.addEventListener('change', saveSettings);
+        
+        darkModeToggle.addEventListener('change', function() {
+            document.body.classList.toggle('dark-mode');
+            saveSettings();
+        });
+        
+        notificationsToggle.addEventListener('change', async function() {
+            if (this.checked) {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        this.checked = false;
+                        showToast('Notification permission denied');
+                    }
+                } catch (error) {
+                    this.checked = false;
+                    showToast('Notifications not supported');
+                }
+            }
+            saveSettings();
+        });
+
+        clearCacheBtn.addEventListener('click', clearCache);
+
+        // Initialize settings on page load
+        document.addEventListener('DOMContentLoaded', loadSettings);
+
+        // Apply settings immediately when changed
+        const applySettings = () => {
+            const settings = JSON.parse(localStorage.getItem('appSettings')) || {};
+            
+            // Apply player settings
+            if (window.parent && window.parent.postMessage) {
+                window.parent.postMessage({
+                    type: 'settingsUpdate',
+                    settings: settings
+                }, '*');
+            }
+            
+            // Apply dark mode
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            
+            // Apply other settings as needed
+            showToast('Settings applied');
+        };
+
+        // Listen for settings changes from other pages
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'settingsRequest') {
+                const settings = JSON.parse(localStorage.getItem('appSettings')) || {};
+                event.source.postMessage({
+                    type: 'settingsResponse',
+                    settings: settings
+                }, '*');
+            }
+        });
+    </script>
+</body>
+</html>

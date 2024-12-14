@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Live TV</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #f8f9fa;
+            --text-color: #202124;
+            --border-color: #dadce0;
+            --hover-color: #f1f3f4;
+        }
+
+        body {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #fff;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .app-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 50%;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 1rem;
+        }
+
+        .playlist-list {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .playlist-item:last-child {
+            border-bottom: none;
+        }
+
+        .playlist-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .playlist-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            margin-right: 1rem;
+        }
+
+        .playlist-info {
+            flex-grow: 1;
+        }
+
+        .playlist-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: var(--text-color);
+        }
+
+        .playlist-meta {
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+
+        .input-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1001;
+            width: 90%;
+            max-width: 500px;
+            display: none;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .input-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .input-field {
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 1rem;
+            background: var(--hover-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background: var(--border-color);
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #1557b0;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .footer {
+            background: #fff;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-link {
+            color: #5f6368;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--primary-color);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 8px;
+            background: #323232;
+            color: #fff;
+            z-index: 1002;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .playlist-item {
+                padding: 1rem;
+            }
+
+            .playlist-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="app-name">Live TV</div>
+            <div class="header-icons">
+                <button class="icon-btn" id="addPlaylistBtn">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="icon-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="playlist-list" id="playlistList">
+            <!-- Playlists will be added here -->
+        </div>
+    </main>
+
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="input-modal" id="inputModal">
+        <h2 class="modal-title">Add New Playlist</h2>
+        <form class="input-form" id="playlistForm">
+            <input type="text" class="input-field" placeholder="Enter M3U Link" id="m3uLink">
+            <div class="file-input-container">
+                <label class="file-input-label">
+                    Choose M3U File
+                    <input type="file" class="file-input" accept=".m3u,.m3u8" id="m3uFile">
+                </label>
+            </div>
+            <button type="submit" class="submit-btn">Add Playlist</button>
+        </form>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#" class="footer-link" id="clearDataBtn">Clear Data</a>
+                <a href="settings.html" class="footer-link">Settings</a>
+            </div>
+            <div class="developer-info">
+                Developed by Your Name
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const addPlaylistBtn = document.getElementById('addPlaylistBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const modalBackdrop = document.getElementById('modalBackdrop');
+        const inputModal = document.getElementById('inputModal');
+        const playlistForm = document.getElementById('playlistForm');
+        const playlistList = document.getElementById('playlistList');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        const notification = document.getElementById('notification');
+        const m3uFile = document.getElementById('m3uFile');
+
+        // Default playlists
+        const defaultPlaylists = [
+            { name: "Entertainment", url: "entertainment.m3u", category: "Entertainment" },
+            { name: "Sports", url: "sports.m3u", category: "Sports" },
+            { name: "News", url: "news.m3u", category: "News" }
+        ];
+
+        // Show notification
+        function showNotification(message, duration = 3000) {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, duration);
+        }
+
+        // Initialize playlists
+        function initializePlaylists() {
+            const savedPlaylists = JSON.parse(localStorage.getItem('playlists')) || defaultPlaylists;
+            playlistList.innerHTML = '';
+            savedPlaylists.forEach(playlist => addPlaylistToList(playlist));
+        }
+
+        // Add playlist to list
+        function addPlaylistToList(playlist) {
+            const item = document.createElement('div');
+            item.className = 'playlist-item';
+            item.innerHTML = `
+                <div class="playlist-icon">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="playlist-info">
+                    <div class="playlist-name">${playlist.name}</div>
+                    <div class="playlist-meta">${playlist.category || 'General'}</div>
+                </div>
+                <div class="playlist-action">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            `;
+            
+            item.addEventListener('click', () => {
+                window.location.href = `video.html?playlist=${encodeURIComponent(playlist.url)}`;
+            });
+            
+            playlistList.appendChild(item);
+        }
+
+        // Handle file input
+        m3uFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const name = file.name.split('.')[0];
+                    const playlist = {
+                        name: name,
+                        url: URL.createObjectURL(file),
+                        category: 'Local Playlist'
+                    };
+                    addPlaylistToList(playlist);
+                    savePlaylist(playlist);
+                    showNotification('Playlist added successfully');
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Show/Hide modal
+        addPlaylistBtn.addEventListener('click', () => {
+            inputModal.style.display = 'block';
+            modalBackdrop.style.display = 'block';
+        });
+
+        modalBackdrop.addEventListener('click', () => {
+            inputModal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+        });
+
+        // Handle playlist form submission
+        playlistForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const m3uLink = document.getElementById('m3uLink').value;
+
+            if (m3uLink) {
+                const name = m3uLink.split('/').pop().split('.')[0];
+                const playlist = {
+                    name: name,
+                    url: m3uLink,
+                    category: 'Online Playlist'
+                };
+                addPlaylistToList(playlist);
+                savePlaylist(playlist);
+                showNotification('Playlist added successfully');
+            }
+
+            inputModal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+            playlistForm.reset();
+        });
+
+        // Save playlist to localStorage
+        function savePlaylist(playlist) {
+            const savedPlaylists = JSON.parse(localStorage.getItem('playlists')) || defaultPlaylists;
+            savedPlaylists.push(playlist);
+            localStorage.setItem('playlists', JSON.stringify(savedPlaylists));
+        }
+
+        // Clear Data
+        clearDataBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all data?')) {
+                localStorage.clear();
+                initializePlaylists();
+                showNotification('All data cleared');
+            }
+        });
+
+        // Settings button
+        settingsBtn.addEventListener('click', () => {
+            window.location.href = 'settings.html';
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initializePlaylists);
+    </script>
+</body>
+</html>

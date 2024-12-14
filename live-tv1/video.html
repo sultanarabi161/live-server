@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- HLS.js for M3U8 support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #f8f9fa;
+            --text-color: #202124;
+            --border-color: #dadce0;
+            --hover-color: #f1f3f4;
+        }
+
+        body {
+            background: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .header {
+            background: #fff;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 50%;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .main-content {
+            margin-top: 70px;
+            padding: 1rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .video-container {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .video-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+
+        .custom-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-container:hover .custom-controls {
+            opacity: 1;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 2px;
+            width: 0;
+            position: relative;
+        }
+
+        .progress-hover {
+            position: absolute;
+            top: -25px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #fff;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .time-display {
+            margin-left: auto;
+            font-size: 0.9rem;
+        }
+
+        .channels-section {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+
+        .search-container {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .channels-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .category-header {
+            padding: 1rem;
+            background: var(--secondary-color);
+            font-weight: 500;
+            color: var(--primary-color);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .channel-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .channel-item.active {
+            background-color: var(--hover-color);
+        }
+
+        .channel-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 1rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--secondary-color);
+        }
+
+        .channel-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .channel-logo .default-logo {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .channel-info {
+            flex-grow: 1;
+        }
+
+        .channel-name {
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .channel-category {
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            background: #dc3545;
+            color: white;
+            border-radius: 8px;
+            z-index: 2001;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0.5rem;
+            }
+
+            .video-container {
+                border-radius: 0;
+            }
+
+            .custom-controls {
+                padding: 0.5rem;
+            }
+
+            .volume-control {
+                display: none;
+            }
+
+            .time-display {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <header class="header">
+        <div class="header-content">
+            <button class="nav-btn" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='settings.html'">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="video-container">
+            <video id="videoPlayer" class="video-player">
+                Your browser does not support the video tag.
+            </video>
+            <div class="custom-controls">
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-hover"></div>
+                    </div>
+                </div>
+                <div class="control-buttons">
+                    <button class="control-btn" id="playPauseBtn">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="control-btn" id="rewindBtn">
+                        <i class="fas fa-backward"></i>
+                    </button>
+                    <button class="control-btn" id="forwardBtn">
+                        <i class="fas fa-forward"></i>
+                    </button>
+                    <div class="volume-control">
+                        <button class="control-btn" id="muteBtn">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100">
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span>
+                        <span>/</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                    <button class="control-btn" id="fullscreenBtn">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="channels-section">
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search channels...">
+            </div>
+            <div class="channels-list" id="channelsList">
+                <!-- Channels will be added here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // DOM Elements
+        const videoPlayer = document.getElementById('videoPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const rewindBtn = document.getElementById('rewindBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const searchInput = document.getElementById('searchInput');
+        const channelsList = document.getElementById('channelsList');
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let hls = null;
+
+        // Initialize player
+        function initializePlayer() {
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    debug: false,
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90
+                });
+                
+                hls.attachMedia(videoPlayer);
+                hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                    console.log('HLS Media Attached');
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        switch(data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                showError('Network error, trying to recover...');
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                showError('Media error, trying to recover...');
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                showError('An error occurred while playing the video');
+                                break;
+                        }
+                    }
+                });
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load and parse M3U playlist
+        async function loadPlaylist(url) {
+            try {
+                showLoading(true);
+                const response = await fetch(url);
+                const content = await response.text();
+                const channels = parseM3U(content);
+                displayChannels(channels);
+            } catch (error) {
+                console.error('Error loading playlist:', error);
+                showError('Failed to load playlist');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Parse M3U content
+        function parseM3U(content) {
+            const lines = content.split('\n');
+            const channels = [];
+            let currentChannel = {};
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.startsWith('#EXTINF:')) {
+                    const matches = line.match(/tvg-logo="([^"]*)".*tvg-group="([^"]*)".*,(.+)/);
+                    if (matches) {
+                        currentChannel.logo = matches[1];
+                        currentChannel.category = matches[2];
+                        currentChannel.name = matches[3].trim();
+                    } else {
+                        currentChannel.name = line.split(',')[1]?.trim() || 'Unknown Channel';
+                        currentChannel.logo = '';
+                        currentChannel.category = 'Uncategorized';
+                    }
+                } else if (line && !line.startsWith('#')) {
+                    currentChannel.url = line;
+                    channels.push({...currentChannel});
+                    currentChannel = {};
+                }
+            });
+
+            return channels;
+        }
+
+        // Display channels
+        function displayChannels(channels) {
+            const categorizedChannels = channels.reduce((acc, channel) => {
+                const category = channel.category || 'Uncategorized';
+                if (!acc[category]) {
+                    acc[category] = [];
+                }
+                acc[category].push(channel);
+                return acc;
+            }, {});
+
+            channelsList.innerHTML = '';
+            
+            Object.entries(categorizedChannels).forEach(([category, categoryChannels]) => {
+                const categorySection = document.createElement('div');
+                categorySection.innerHTML = `
+                    <div class="category-header">${category}</div>
+                    ${categoryChannels.map(channel => `
+                        <div class="channel-item" data-url="${channel.url}">
+                            <div class="channel-logo">
+                                ${channel.logo ? 
+                                    `<img src="${channel.logo}" alt="${channel.name}" onerror="this.parentElement.innerHTML='<div class=\'default-logo\'><i class=\'fas fa-tv\'></i></div>'">`
+                                    : `<div class="default-logo"><i class="fas fa-tv"></i></div>`
+                                }
+                            </div>
+                            <div class="channel-info">
+                                <div class="channel-name">${channel.name}</div>
+                                <div class="channel-category">${category}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+                channelsList.appendChild(categorySection);
+            });
+
+            // Add click events to channels
+            document.querySelectorAll('.channel-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const url = item.dataset.url;
+                    playChannel(url);
+                    document.querySelectorAll('.channel-item').forEach(ch => ch.classList.remove('active'));
+                    item.classList.add('active');
+                });
+            });
+        }
+
+        // Play channel
+        function playChannel(url) {
+            if (Hls.isSupported()) {
+                if (hls) {
+                    hls.destroy();
+                }
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(videoPlayer);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    videoPlayer.play().catch(e => console.log('Play failed:', e));
+                });
+            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                videoPlayer.src = url;
+                videoPlayer.play().catch(e => console.log('Play failed:', e));
+            }
+        }
+
+        // Player controls
+        playPauseBtn.addEventListener('click', togglePlay);
+        rewindBtn.addEventListener('click', () => videoPlayer.currentTime -= 10);
+        forwardBtn.addEventListener('click', () => videoPlayer.currentTime += 10);
+        muteBtn.addEventListener('click', toggleMute);
+        volumeSlider.addEventListener('input', handleVolumeChange);
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        // Search functionality
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            document.querySelectorAll('.channel-item').forEach(item => {
+                const channelName = item.querySelector('.channel-name').textContent.toLowerCase();
+                const channelCategory = item.querySelector('.channel-category').textContent.toLowerCase();
+                const shouldShow = channelName.includes(searchTerm) || channelCategory.includes(searchTerm);
+                item.style.display = shouldShow ? 'flex' : 'none';
+            });
+        });
+
+        // Helper functions
+        function togglePlay() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                videoPlayer.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        }
+
+        function toggleMute() {
+            videoPlayer.muted = !videoPlayer.muted;
+            muteBtn.innerHTML = videoPlayer.muted ? 
+                '<i class="fas fa-volume-mute"></i>' : 
+                '<i class="fas fa-volume-up"></i>';
+            volumeSlider.value = videoPlayer.muted ? 0 : videoPlayer.volume * 100;
+        }
+
+        function handleVolumeChange() {
+            videoPlayer.volume = volumeSlider.value / 100;
+            videoPlayer.muted = volumeSlider.value === '0';
+            muteBtn.innerHTML = videoPlayer.muted ? 
+                '<i class="fas fa-volume-mute"></i>' : 
+                '<i class="fas fa-volume-up"></i>';
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoPlayer.requestFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
+        function showLoading(show) {
+            loadingOverlay.style.display = show ? 'flex' : 'none';
+        }
+
+        // Update progress bar
+        videoPlayer.addEventListener('timeupdate', () => {
+            const percent = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+            progressBar.style.width = `${percent}%`;
+            currentTimeEl.textContent = formatTime(videoPlayer.currentTime);
+        });
+
+        videoPlayer.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(videoPlayer.duration);
+        });
+
+        // Format time to MM:SS
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            seconds = Math.floor(seconds % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Progress bar click handling
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            videoPlayer.currentTime = pos * videoPlayer.duration;
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePlayer();
+            const urlParams = new URLSearchParams(window.location.search);
+            const playlistUrl = urlParams.get('playlist');
+            if (playlistUrl) {
+                loadPlaylist(playlistUrl);
+            }
+        });
+    </script>
+</body>
+</html>
