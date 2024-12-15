@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings - LiveTV Stream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --border-color: #dadce0;
+            --header-height: 60px;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --primary-color: #8ab4f8;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --bg-primary: #202124;
+            --bg-secondary: #292a2d;
+            --border-color: #3c4043;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            height: var(--header-height);
+            background: var(--bg-secondary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+        }
+
+        .header-content {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .app-title {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        .back-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background: var(--bg-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: var(--header-height);
+            padding: 24px 16px;
+            flex: 1;
+            max-width: 800px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Settings Sections */
+        .settings-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .section-icon {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .setting-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        .toggle-input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Select Input */
+        .setting-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .setting-select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Storage Info */
+        .storage-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .storage-bar {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .storage-used {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0;
+            transition: width 0.3s;
+        }
+
+        .storage-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .primary-button {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .danger-button {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 2000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 100%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        /* About Section */
+        .about-content {
+            padding: 16px;
+        }
+
+        .about-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .version-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* Mobile Specific Styles */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 16px;
+            }
+
+            .setting-select {
+                min-width: 100px;
+            }
+
+            .toast {
+                width: calc(100% - 32px);
+                text-align: center;
+            }
+        }
+
+        /* PWA Installed App Styles */
+        @media all and (display-mode: standalone) {
+            .header {
+                padding-top: env(safe-area-inset-top);
+            }
+
+            .main-content {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="logo.png" alt="LiveTV Stream" class="app-logo">
+                <span class="app-title">Settings</span>
+            </div>
+            <button class="back-button" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Appearance Settings -->
+        <div class="settings-section">
+            <div class="section-header">
+                <i class="fas fa-paint-brush section-icon"></i>
+                <h2 class="section-title">Appearance</h2>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-name">Dark Theme</div>
+                    <div class="setting-description">Enable dark mode for better viewing at night</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input" id="darkModeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Playback Settings -->
+        <div class="settings-section">
+            <div class="section-header">
+                <i class="fas fa-play-circle section-icon"></i>
+                <h2 class="section-title">Playback</h2>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-name">Auto-Play</div>
+                    <div class="setting-description">Automatically play channels when selected</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input" id="autoPlayToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-name">Default Quality</div>
+                    <div class="setting-description">Set preferred streaming quality</div>
+                </div>
+                <select class="setting-select" id="qualitySelect">
+                    <option value="auto">Auto</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-name">Hardware Acceleration</div>
+                    <div class="setting-description">Use GPU for better performance</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input" id="hardwareAccelToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Storage Settings -->
+        <div class="settings-section">
+            <div class="section-header">
+                <i class="fas fa-database section-icon"></i>
+                <h2 class="section-title">Storage</h2>
+            </div>
+            
+            <div class="storage-info">
+                <div class="storage-bar">
+                    <div class="storage-used" id="storageUsed"></div>
+                </div>
+                <div class="storage-text">
+                    <span id="usedSpace">0 MB</span>
+                    <span id="totalSpace">0 MB</span>
+                </div>
+                <button class="button danger-button" onclick="clearCache()">
+                    <i class="fas fa-trash"></i>
+                    Clear Cache
+                </button>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="settings-section">
+            <div class="section-header">
+                <i class="fas fa-info-circle section-icon"></i>
+                <h2 class="section-title">About</h2>
+            </div>
+            
+            <div class="about-content">
+                <p class="about-text">
+                    LiveTV Stream is a professional IPTV streaming application that supports 
+                    various playlist formats and provides a seamless viewing experience.
+                </p>
+                <div class="version-info">
+                    <span>Version: 1.0.2</span>
+                    <span>Build: 2024.12.15</span>
+                    <span>Developer: Sultan Arabi</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // DOM Elements
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const autoPlayToggle = document.getElementById('autoPlayToggle');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const hardwareAccelToggle = document.getElementById('hardwareAccelToggle');
+        const storageUsed = document.getElementById('storageUsed');
+        const usedSpaceText = document.getElementById('usedSpace');
+        const totalSpaceText = document.getElementById('totalSpace');
+        const toast = document.getElementById('toast');
+
+        // Load settings on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            updateStorageInfo();
+        });
+
+        // Load saved settings
+        function loadSettings() {
+            // Dark mode
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            darkModeToggle.checked = darkMode;
+            updateTheme(darkMode);
+
+            // Auto-play
+            const autoPlay = localStorage.getItem('autoPlay') === 'true';
+            autoPlayToggle.checked = autoPlay;
+
+            // Quality
+            const quality = localStorage.getItem('quality') || 'auto';
+            qualitySelect.value = quality;
+
+            // Hardware acceleration
+            const hardwareAccel = localStorage.getItem('hardwareAccel') === 'true';
+            hardwareAccelToggle.checked = hardwareAccel;
+        }
+
+        // Event Listeners
+        darkModeToggle.addEventListener('change', () => {
+            localStorage.setItem('darkMode', darkModeToggle.checked);
+            updateTheme(darkModeToggle.checked);
+            showToast('Theme updated');
+        });
+
+        autoPlayToggle.addEventListener('change', () => {
+            localStorage.setItem('autoPlay', autoPlayToggle.checked);
+            showToast('Auto-play setting updated');
+        });
+
+        qualitySelect.addEventListener('change', () => {
+            localStorage.setItem('quality', qualitySelect.value);
+            showToast('Quality preference updated');
+        });
+
+        hardwareAccelToggle.addEventListener('change', () => {
+            localStorage.setItem('hardwareAccel', hardwareAccelToggle.checked);
+            showToast('Hardware acceleration setting updated');
+        });
+
+        // Update theme
+        function updateTheme(isDark) {
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        }
+
+        // Clear cache
+        async function clearCache() {
+            try {
+                const caches = await window.caches?.keys();
+                if (caches) {
+                    await Promise.all(caches.map(cache => window.caches.delete(cache)));
+                }
+                localStorage.clear();
+                loadSettings();
+                updateStorageInfo();
+                showToast('Cache cleared successfully');
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                showToast('Failed to clear cache');
+            }
+        }
+
+        // Update storage info
+        async function updateStorageInfo() {
+            try {
+                if (navigator.storage && navigator.storage.estimate) {
+                    const {usage, quota} = await navigator.storage.estimate();
+                    const usedMB = Math.round(usage / (1024 * 1024));
+                    const totalMB = Math.round(quota / (1024 * 1024));
+                    const percentUsed = (usage / quota) * 100;
+
+                    storageUsed.style.width = `${percentUsed}%`;
+                    usedSpaceText.textContent = `${usedMB} MB used`;
+                    totalSpaceText.textContent = `${totalMB} MB total`;
+                }
+            } catch (error) {
+                console.error('Error getting storage info:', error);
+            }
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Handle back gesture on mobile
+        let touchStartX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (touchStartX > 50) {
+                const deltaX = e.touches[0].clientX - touchStartX;
+                if (deltaX > 100) {
+                    history.back();
+                }
+            }
+        }, { passive: true });
+    </script>
+</body>
+</html>
