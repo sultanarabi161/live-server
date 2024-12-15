@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UltraStream - Live TV Streaming</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #121420;
+            --secondary-bg: #1E2232;
+            --accent-color: #4A90E2;
+            --text-color: #FFFFFF;
+            --hover-color: #5A6ACF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--secondary-bg);
+            padding: 15px 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .logo img {
+            width: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .action-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        /* Playlist Section */
+        .playlist-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .playlist-card {
+            background-color: var(--secondary-bg);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .playlist-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .playlist-card i {
+            font-size: 50px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .playlist-card h3 {
+            margin-bottom: 10px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-bg);
+            padding: 30px;
+            border-radius: 15px;
+            width: 500px;
+            max-width: 90%;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--accent-color);
+            color: white;
+            border-radius: 5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .playlist-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="/api/placeholder/50/50" alt="UltraStream Logo">
+            UltraStream
+        </div>
+        <div class="header-actions">
+            <button class="action-btn" onclick="openAddPlaylistModal()">
+                <i class="fas fa-plus"></i> Add Playlist
+            </button>
+            <button class="action-btn" onclick="navigateToSettings()">
+                <i class="fas fa-cog"></i> Settings
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="playlist-section" id="playlistContainer">
+            <div class="playlist-card" onclick="openPlaylist('sports')">
+                <i class="fas fa-football-ball"></i>
+                <h3>Sports Channels</h3>
+                <p>45 Channels • Live Now</p>
+            </div>
+            <div class="playlist-card" onclick="openPlaylist('movies')">
+                <i class="fas fa-film"></i>
+                <h3>Movie Channels</h3>
+                <p>30 Channels • HD Quality</p>
+            </div>
+            <div class="playlist-card" onclick="openPlaylist('news')">
+                <i class="fas fa-newspaper"></i>
+                <h3>News Channels</h3>
+                <p>25 Channels • Breaking News</p>
+            </div>
+            <div class="playlist-card" onclick="openPlaylist('entertainment')">
+                <i class="fas fa-tv"></i>
+                <h3>Entertainment</h3>
+                <p>35 Channels • Top Shows</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Playlist Modal -->
+    <div id="addPlaylistModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Playlist</h2>
+            <input type="text" id="playlistUrlInput" class="modal-input" placeholder="Enter M3U Playlist URL">
+            <input type="text" id="playlistNameInput" class="modal-input" placeholder="Playlist Name (Optional)">
+            <button class="action-btn" onclick="savePlaylist()">Save Playlist</button>
+            <button class="action-btn" style="background-color: #ff4444;" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Playlist Management
+        class PlaylistManager {
+            constructor() {
+                this.playlists = JSON.parse(localStorage.getItem('userPlaylists')) || [];
+            }
+
+            addPlaylist(url, name) {
+                const newPlaylist = {
+                    id: Date.now(),
+                    url: url,
+                    name: name || `Playlist ${this.playlists.length + 1}`,
+                    channels: []
+                };
+                this.playlists.push(newPlaylist);
+                this.savePlaylists();
+            }
+
+            savePlaylists() {
+                localStorage.setItem('userPlaylists', JSON.stringify(this.playlists));
+            }
+
+            renderPlaylists() {
+                const container = document.getElementById('playlistContainer');
+                this.playlists.forEach(playlist => {
+                    const playlistCard = document.createElement('div');
+                    playlistCard.className = 'playlist-card';
+                    playlistCard.innerHTML = `
+                        <i class="fas fa-list"></i>
+                        <h3>${playlist.name}</h3>
+                        <p>${playlist.url}</p>
+                    `;
+                    playlistCard.onclick = () => openPlaylist(playlist.id);
+                    container.appendChild(playlistCard);
+                });
+            }
+        }
+
+        const playlistManager = new PlaylistManager();
+
+        // Modal Functions
+        function openAddPlaylistModal() {
+            document.getElementById('addPlaylistModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('addPlaylistModal').style.display = 'none';
+        }
+
+        function savePlaylist() {
+            const url = document.getElementById('playlistUrlInput').value;
+            const name = document.getElementById('playlistNameInput').value;
+
+            if (url) {
+                playlistManager.addPlaylist(url, name);
+                closeModal();
+                location.reload(); // Refresh to show new playlist
+            } else {
+                alert('Please enter a playlist URL');
+            }
+        }
+
+        // Navigation Functions
+        function openPlaylist(playlistId) {
+            window.location.href = `video.html?playlist=${playlistId}`;
+        }
+
+        function navigateToSettings() {
+            window.location.href = 'settings.html';
+        }
+
+        // Initialize Playlists
+        window.onload = () => {
+            playlistManager.renderPlaylists();
+        };
+    </script>
+</body>
+</html>
