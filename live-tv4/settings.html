@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Live TV Streaming</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        .header {
+            background: #ffffff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #5f6368;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .icon-button:hover {
+            background-color: #f1f3f4;
+        }
+
+        /* Settings Container */
+        .settings-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .settings-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
+        .settings-section h2 {
+            color: #202124;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Settings Items */
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .setting-title {
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #1a73e8;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Select Input */
+        .setting-select {
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background: #fff;
+            color: #202124;
+            min-width: 150px;
+        }
+
+        /* Developer Info */
+        .developer-info {
+            color: #5f6368;
+            line-height: 1.6;
+        }
+
+        .developer-info a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .developer-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* Version Info */
+        .version-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            color: #5f6368;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .settings-container {
+                margin: 1rem auto;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .setting-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo">LiveTV Stream</a>
+        <button class="icon-button" onclick="location.href='index.html'">←</button>
+    </header>
+
+    <div class="settings-container">
+        <div class="settings-section">
+            <h2>Appearance</h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Dark Mode</span>
+                    <span class="setting-description">Switch between light and dark theme</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2>Playback Settings</h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Auto-Play</span>
+                    <span class="setting-description">Automatically play channels when selected</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoPlayToggle" onchange="toggleAutoPlay()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-title">Quality</span>
+                    <span class="setting-description">Select default streaming quality</span>
+                </div>
+                <select class="setting-select" id="qualitySelect" onchange="changeQuality()">
+                    <option value="auto">Auto</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2>Developer Information</h2>
+            <div class="developer-info">
+                <p>Developed by Your Name</p>
+                <p>Contact: <a href="mailto:developer@example.com">developer@example.com</a></p>
+                <div class="version-info">
+                    <p>Version: 1.0.0</p>
+                    <p>Last Updated: December 2024</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load saved settings when page loads
+        document.addEventListener('DOMContentLoaded', loadSettings);
+
+        function loadSettings() {
+            // Load dark mode setting
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            document.getElementById('darkModeToggle').checked = darkMode;
+            if(darkMode) document.body.classList.add('dark-mode');
+
+            // Load auto-play setting
+            const autoPlay = localStorage.getItem('autoPlay') === 'true';
+            document.getElementById('autoPlayToggle').checked = autoPlay;
+
+            // Load quality setting
+            const quality = localStorage.getItem('quality') || 'auto';
+            document.getElementById('qualitySelect').value = quality;
+        }
+
+        function toggleDarkMode() {
+            const darkMode = document.getElementById('darkModeToggle').checked;
+            localStorage.setItem('darkMode', darkMode);
+            document.body.classList.toggle('dark-mode', darkMode);
+        }
+
+        function toggleAutoPlay() {
+            const autoPlay = document.getElementById('autoPlayToggle').checked;
+            localStorage.setItem('autoPlay', autoPlay);
+        }
+
+        function changeQuality() {
+            const quality = document.getElementById('qualitySelect').value;
+            localStorage.setItem('quality', quality);
+        }
+
+        // Save settings before leaving page
+        window.addEventListener('beforeunload', () => {
+            const settings = {
+                darkMode: document.getElementById('darkModeToggle').checked,
+                autoPlay: document.getElementById('autoPlayToggle').checked,
+                quality: document.getElementById('qualitySelect').value
+            };
+            localStorage.setItem('settings', JSON.stringify(settings));
+        });
+    </script>
+</body>
+</html>
