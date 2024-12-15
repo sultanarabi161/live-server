@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player - Live TV Streaming</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            background: #ffffff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .app-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #5f6368;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .icon-button:hover {
+            background-color: #f1f3f4;
+        }
+
+        /* video.html এর CSS এ পরিবর্তন করুন */
+
+/* Main Container এর CSS আপডেট */
+.main-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1rem;
+    padding: 1rem;
+    height: calc(100vh - 70px); /* হেডার হাইট অনুযায়ী সামঞ্জস্য করুন */
+    max-height: calc(100vh - 70px);
+    overflow: hidden;
+}
+
+/* Video Container এর CSS আপডেট */
+.video-container {
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 অ্যাসপেক্ট রেশিও */
+}
+
+.video-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Channel Container এর CSS আপডেট */
+.channel-container {
+    background: #ffffff;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 90px); /* হেডার এবং প্যাডিং অনুযায়ী সামঞ্জস্য করুন */
+    overflow: hidden;
+}
+
+.channel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+/* রেসপনসিভ ডিজাইন আপডেট */
+@media (max-width: 768px) {
+    .main-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        max-height: none;
+        overflow: auto;
+    }
+
+    .video-container {
+        padding-bottom: 56.25%; /* মোবাইলে 16:9 অ্যাসপেক্ট রেশিও বজায় রাখুন */
+    }
+
+    .channel-container {
+        height: 400px; /* মোবাইলে ফিক্সড হাইট */
+        margin-top: 1rem;
+    }
+}
+
+/* অতিরিক্ত CSS যোগ করুন যাতে স্ক্রল না হয় */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header {
+    flex-shrink: 0; /* হেডার যাতে ছোট না হয় */
+}
+        /* Loading and Error Overlays */
+        .loading-overlay, .error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .loading-overlay .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        .error-overlay {
+            color: #ff4444;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .error-overlay i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .retry-button {
+            padding: 0.8rem 1.5rem;
+            background: #ff4444;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .retry-button:hover {
+            background: #ff1111;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Video Controls */
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-container:hover .video-controls {
+            opacity: 1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            margin-bottom: 1rem;
+            cursor: pointer;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .progress-filled {
+            width: 0;
+            height: 100%;
+            background: #1a73e8;
+            border-radius: 2px;
+            position: absolute;
+        }
+
+        .controls-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .controls-left, .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .control-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .volume-filled {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            position: absolute;
+        }
+
+        .time-display {
+            color: white;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Channel Container */
+        .channel-container {
+            background: #ffffff;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .search-container {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        .channel-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            gap: 1rem;
+        }
+
+        .channel-item:hover {
+            background-color: #f1f3f4;
+        }
+
+        .channel-item.active {
+            background-color: #e8f0fe;
+        }
+
+        .channel-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .channel-info {
+            flex: 1;
+        }
+
+        .channel-name {
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 0.2rem;
+        }
+
+        .channel-category {
+            font-size: 0.8rem;
+            color: #5f6368;
+        }
+
+        /* Scrollbar Styling */
+        .channel-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .channel-list::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 4px;
+        }
+
+        .channel-list::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 4px;
+        }
+
+        .channel-list::-webkit-scrollbar-thumb:hover {
+            background: #bdc1c6;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow: auto;
+            }
+
+            .video-container {
+                height: 56.25vw;
+            }
+
+            .channel-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="logo.png" alt="LiveTV Stream" class="app-logo">
+            <a href="index.html" class="logo">LiveTV Stream</a>
+        </div>
+        <button class="icon-button" onclick="location.href='settings.html'">
+            <i class="fas fa-cog"></i>
+        </button>
+    </header>
+
+    <div class="main-container">
+        <div class="video-container">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <span>Loading...</span>
+            </div>
+            <div class="error-overlay" id="errorOverlay">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="error-message">Error: Unable to play this channel</div>
+                <button class="retry-button" onclick="retryPlayback()">
+                    <i class="fas fa-redo"></i> Retry
+                </button>
+            </div>
+            <video id="videoPlayer" class="video-player">
+                Your browser does not support the video element.
+            </video>
+            <div class="video-controls" id="videoControls">
+                <div class="progress-bar">
+                    <div class="progress-filled"></div>
+                </div>
+                <div class="controls-main">
+                    <div class="controls-left">
+                        <button class="control-button" id="playPauseBtn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="control-button" id="rewindBtn">
+                            <i class="fas fa-backward"></i>
+                        </button>
+                        <button class="control-button" id="forwardBtn">
+                            <i class="fas fa-forward"></i>
+                        </button>
+                        <div class="volume-container">
+                            <button class="control-button" id="muteBtn">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                            <div class="volume-slider">
+                                <div class="volume-filled"></div>
+                            </div>
+                        </div>
+                        <div class="time-display">
+                            <span id="currentTime">0:00</span>
+                            <span>/</span>
+                            <span id="duration">0:00</span>
+                        </div>
+                    </div>
+                    <div class="controls-right">
+                        <button class="control-button" id="qualityBtn">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="control-button" id="pipBtn">
+                            <i class="fas fa-clone"></i>
+                        </button>
+                        <button class="control-button" id="fullscreenBtn">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="channel-container">
+            <div class="search-container">
+                <input type="text" class="search-box" placeholder="Search channels..." 
+                       id="searchInput" onkeyup="searchChannels()">
+            </div>
+            <div class="channel-list" id="channelList">
+                <!-- Channels will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const playlistUrl = urlParams.get('playlist');
+        const playlistName = urlParams.get('name');
+
+        // Player elements
+        const videoPlayer = document.getElementById('videoPlayer');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorOverlay = document.getElementById('errorOverlay');
+        const channelList = document.getElementById('channelList');
+        let channels = [];
+        let currentChannel = null;
+
+        // Parse M3U playlist
+        async function parseM3U(url) {
+            try {
+                showLoading();
+                const response = await fetch(url);
+                const text = await response.text();
+                const lines = text.split('\n');
+                channels = [];
+                
+                for(let i = 0; i < lines.length; i++) {
+                    if(lines[i].startsWith('#EXTINF:')) {
+                        const infoLine = lines[i];
+                        const urlLine = lines[i + 1];
+                        
+                        // Parse channel info
+                        const nameMatch = infoLine.match(/,(.+)$/);
+                        const logoMatch = infoLine.match(/tvg-logo="([^"]+)"/);
+                        const groupMatch = infoLine.match(/group-title="([^"]+)"/);
+                        
+                        channels.push({
+                            name: nameMatch ? nameMatch[1].trim() : 'Unknown Channel',
+                            url: urlLine.trim(),
+                            logo: logoMatch ? logoMatch[1] : 'default-logo.png',
+                            category: groupMatch ? groupMatch[1] : 'Uncategorized'
+                        });
+                    }
+                }
+                renderChannels();
+            } catch(error) {
+                console.error('Error parsing M3U:', error);
+                showError();
+            }
+        }
+
+        // Render channel list
+        function renderChannels() {
+            channelList.innerHTML = '';
+            const filteredChannels = channels.filter(channel => {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                return channel.name.toLowerCase().includes(searchTerm);
+            });
+
+            filteredChannels.forEach((channel, index) => {
+                const channelElement = document.createElement('div');
+                channelElement.className = `channel-item ${currentChannel === index ? 'active' : ''}`;
+                channelElement.innerHTML = `
+                    <img src="${channel.logo}" alt="${channel.name}" class="channel-logo"
+                         onerror="this.src='default-logo.png'">
+                    <div class="channel-info">
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-category">${channel.category}</div>
+                    </div>
+                `;
+                channelElement.onclick = () => playChannel(index);
+                channelList.appendChild(channelElement);
+            });
+        }
+
+        // Play channel
+        async function playChannel(index) {
+            currentChannel = index;
+            const channel = channels[index];
+            
+            showLoading();
+            try {
+                videoPlayer.src = channel.url;
+                await videoPlayer.play();
+                hideLoading();
+            } catch(error) {
+                console.error('Playback error:', error);
+                showError();
+            }
+            
+            renderChannels();
+        }
+
+        // Loading and error handling
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+            errorOverlay.style.display = 'none';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showError() {
+            loadingOverlay.style.display = 'none';
+            errorOverlay.style.display = 'flex';
+        }
+
+        function retryPlayback() {
+            if (currentChannel !== null) {
+                playChannel(currentChannel);
+            }
+        }
+
+        // Video player controls
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const pipBtn = document.getElementById('pipBtn');
+        const volumeSlider = document.querySelector('.volume-slider');
+        const progressBar = document.querySelector('.progress-bar');
+        const timeDisplay = document.querySelector('.time-display');
+
+        // Play/Pause
+        playPauseBtn.onclick = () => {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                videoPlayer.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        };
+
+        // Mute
+        muteBtn.onclick = () => {
+            videoPlayer.muted = !videoPlayer.muted;
+            muteBtn.innerHTML = videoPlayer.muted ? 
+                '<i class="fas fa-volume-mute"></i>' : 
+                '<i class="fas fa-volume-up"></i>';
+        };
+
+        // Fullscreen
+        fullscreenBtn.onclick = () => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            } else {
+                videoPlayer.requestFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            }
+        };
+
+        // Picture in Picture
+        pipBtn.onclick = async () => {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    await videoPlayer.requestPictureInPicture();
+                }
+            } catch (error) {
+                console.error('PiP error:', error);
+            }
+        };
+
+        // Volume control
+        volumeSlider.onclick = (e) => {
+            const rect = volumeSlider.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            videoPlayer.volume = Math.max(0, Math.min(1, pos));
+            document.querySelector('.volume-filled').style.width = (pos * 100) + '%';
+        };
+
+        // Search channels
+        function searchChannels() {
+            renderChannels();
+        }
+
+        // Initialize
+        if (playlistUrl && playlistUrl !== '#') {
+            parseM3U(playlistUrl);
+            document.title = `${playlistName} - Live TV Streaming`;
+        }
+
+        // Video player events
+        videoPlayer.addEventListener('loadstart', showLoading);
+        videoPlayer.addEventListener('playing', hideLoading);
+        videoPlayer.addEventListener('error', showError);
+    </script>
+</body>
+</html>
