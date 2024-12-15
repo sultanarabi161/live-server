@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UltraStream - Video Player</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #121420;
+            --secondary-bg: #1E2232;
+            --accent-color: #4A90E2;
+            --text-color: #FFFFFF;
+            --hover-color: #5A6ACF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .video-container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .video-player-wrapper {
+            flex: 3;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #mainVideoPlayer {
+            width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .video-controls {
+            background-color: var(--secondary-bg);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .channel-list {
+            flex: 1;
+            background-color: var(--secondary-bg);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-box {
+            padding: 15px;
+            background-color: var(--primary-bg);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--secondary-bg);
+            border: none;
+            color: var(--text-color);
+            border-radius: 5px;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--primary-bg);
+            margin: 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .channel-item:hover {
+            background-color: var(--secondary-bg);
+        }
+
+        .channel-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            margin-right: 15px;
+        }
+
+        .channel-info {
+            flex-grow: 1;
+        }
+
+        .channel-name {
+            font-weight: bold;
+        }
+
+        .channel-category {
+            color: var(--accent-color);
+            font-size: 0.8em;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .video-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="video-controls">
+        <button onclick="goBack()" class="action-btn">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <div>UltraStream Video Player</div>
+        <button onclick="openSettings()" class="action-btn">
+            <i class="fas fa-cog"></i>
+        </button>
+    </header>
+
+    <div class="video-container">
+        <div class="video-player-wrapper">
+            <video id="mainVideoPlayer" controls>
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="channel-list">
+            <div class="search-box">
+                <input type="text" class="search-input" id="channelSearch" placeholder="Search Channels..." oninput="filterChannels()">
+            </div>
+            <div id="channelContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        class ChannelManager {
+            constructor() {
+                this.channels = {
+                    'sports': [
+                        { 
+                            name: 'ESPN', 
+                            url: 'https://example.com/espn.m3u8', 
+                            category: 'Sports',
+                            quality: 'HD'
+                        },
+                        { 
+                            name: 'Fox Sports', 
+                            url: 'https://example.com/foxsports.m3u8', 
+                            category: 'Sports',
+                            quality: 'FHD'
+                        }
+                    ],
+                    'movies': [
+                        { 
+                            name: 'Movie Channel', 
+                            url: 'https://example.com/moviechannel.m3u8', 
+                            category: 'Movies',
+                            quality: '4K'
+                        }
+                    ]
+                };
+            }
+
+            getChannels(playlistId) {
+                return this.channels[playlistId] || [];
+            }
+
+            renderChannels(playlistId) {
+                const container = document.getElementById('channelContainer');
+                container.innerHTML = '';
+                
+                const channels = this.getChannels(playlistId);
+                channels.forEach(channel => {
+                    const channelElement = document.createElement('div');
+                    channelElement.className = 'channel-item';
+                    channelElement.innerHTML = `
+                        <img src="/api/placeholder/50/50" alt="${channel.name} Logo" class="channel-logo">
+                        <div class="channel-info">
+                            <div class="channel-name">${channel.name}</div>
+                            <div class="channel-category">${channel.category} • ${channel.quality}</div>
+                        </div>
+                    `;
+                    channelElement.onclick = () => this.playChannel(channel);
+                    container.appendChild(channelElement);
+                });
+            }
+
+            playChannel(channel) {
+                const videoPlayer = document.getElementById('mainVideoPlayer');
+                videoPlayer.src = channel.url;
+                videoPlayer.play();
+
+                // Highlight selected channel
+                const channelItems = document.querySelectorAll('.channel-item');
+                channelItems.forEach(item => item.classList.remove('selected'));
+                event.currentTarget.classList.add('selected');
+            }
+
+            filterChannels() {
+                const searchTerm = document.getElementById('channelSearch').value.toLowerCase();
+                const channelItems = document.querySelectorAll('.channel-item');
+                
+                channelItems.forEach(item => {
+                    const channelText = item.textContent.toLowerCase();
+                    item.style.display = channelText.includes(searchTerm) ? 'flex' : 'none';
+                });
+            }
+        }
+
+        // Global Channel Manager Instance
+        const channelManager = new ChannelManager();
+
+        // Page Initialization Functions
+        function initializePage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const playlistId = urlParams.get('playlist') || 'sports';
+            
+            channelManager.renderChannels(playlistId);
+        }
+
+        // Navigation and Interaction Functions
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        function openSettings() {
+            window.location.href = 'settings.html';
+        }
+
+        // Event Listeners
+        document.getElementById('channelSearch').addEventListener('input', () => {
+            channelManager.filterChannels();
+        });
+
+        // Initialize Page on Load
+        window.onload = initializePage;
+    </script>
+</body>
+</html>
