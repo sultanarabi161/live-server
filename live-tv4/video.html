@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player - Live TV Streaming</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+        }
+
+        /* Header Styles */
+        .header {
+            background: #ffffff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #5f6368;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .icon-button:hover {
+            background-color: #f1f3f4;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Video Player */
+        .video-container {
+            background: #000000;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Channel List */
+        .channel-container {
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .channel-header {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        .channel-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .channel-item:hover {
+            background-color: #f1f3f4;
+        }
+
+        .channel-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 1rem;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .channel-info {
+            flex: 1;
+        }
+
+        .channel-name {
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 0.2rem;
+        }
+
+        .channel-category {
+            font-size: 0.8rem;
+            color: #5f6368;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #5f6368;
+        }
+
+        /* Active Channel */
+        .channel-item.active {
+            background-color: #e8f0fe;
+        }
+
+        .channel-item.active .channel-name {
+            color: #1a73e8;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo">LiveTV Stream</a>
+        <button class="icon-button" onclick="location.href='settings.html'">⚙️</button>
+    </header>
+
+    <div class="main-container">
+        <div class="video-container">
+            <video id="videoPlayer" class="video-player" controls autoplay></video>
+        </div>
+
+        <div class="channel-container">
+            <div class="channel-header">
+                <input type="text" class="search-box" placeholder="Search channels..." 
+                       id="searchInput" onkeyup="searchChannels()">
+            </div>
+            <div class="channel-list" id="channelList">
+                <!-- Channels will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const playlistUrl = urlParams.get('playlist');
+        const playlistName = urlParams.get('name');
+
+        // Sample channels (replace with actual M3U parsing)
+        let channels = [
+            { 
+                name: 'Channel 1', 
+                url: 'https://example.com/stream1',
+                category: 'Entertainment',
+                logo: '📺'
+            },
+            { 
+                name: 'Channel 2', 
+                url: 'https://example.com/stream2',
+                category: 'Sports',
+                logo: '⚽'
+            },
+            // Add more channels as needed
+        ];
+
+        let currentChannel = null;
+        const videoPlayer = document.getElementById('videoPlayer');
+        const channelList = document.getElementById('channelList');
+
+        // Initialize the player
+        function initPlayer() {
+            document.title = `${playlistName} - Live TV Streaming`;
+            renderChannels(channels);
+        }
+
+        // Render channel list
+        function renderChannels(channelsToRender) {
+            channelList.innerHTML = '';
+            
+            channelsToRender.forEach((channel, index) => {
+                const channelElement = document.createElement('div');
+                channelElement.className = `channel-item ${currentChannel === index ? 'active' : ''}`;
+                channelElement.innerHTML = `
+                    <div class="channel-logo">${channel.logo}</div>
+                    <div class="channel-info">
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-category">${channel.category}</div>
+                    </div>
+                `;
+                channelElement.onclick = () => playChannel(index);
+                channelList.appendChild(channelElement);
+            });
+        }
+
+        // Play selected channel
+        function playChannel(index) {
+            currentChannel = index;
+            const channel = channels[index];
+            
+            // Update video source
+            videoPlayer.src = channel.url;
+            videoPlayer.play().catch(e => console.log('Playback error:', e));
+
+            // Update UI
+            document.querySelectorAll('.channel-item').forEach((item, idx) => {
+                item.classList.toggle('active', idx === index);
+            });
+        }
+
+        // Search channels
+        function searchChannels() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredChannels = channels.filter(channel => 
+                channel.name.toLowerCase().includes(searchTerm) || 
+                channel.category.toLowerCase().includes(searchTerm)
+            );
+            renderChannels(filteredChannels);
+        }
+
+        // Parse M3U file (basic implementation)
+        async function parseM3U(url) {
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                // Implement M3U parsing logic here
+                // This is a simplified example
+                const lines = text.split('\n');
+                channels = []; // Reset channels
+
+                for(let i = 0; i < lines.length; i++) {
+                    if(lines[i].startsWith('#EXTINF:')) {
+                        // Parse channel info
+                        const channelInfo = lines[i];
+                        const channelUrl = lines[i + 1];
+                        
+                        // Extract channel name and category (implement based on your M3U format)
+                        channels.push({
+                            name: 'Channel ' + channels.length,
+                            url: channelUrl,
+                            category: 'Unknown',
+                            logo: '📺'
+                        });
+                    }
+                }
+                renderChannels(channels);
+            } catch(error) {
+                console.error('Error parsing M3U:', error);
+                // Show error message to user
+            }
+        }
+
+        // Handle video player errors
+        videoPlayer.onerror = function() {
+            console.error('Video playback error');
+            // Show error message to user
+        };
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initPlayer);
+
+        // If we have a playlist URL, parse it
+        if(playlistUrl && playlistUrl !== '#') {
+            parseM3U(playlistUrl);
+        }
+    </script>
+</body>
+</html>
