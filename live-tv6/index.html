@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* Core Styles */
         * {
             margin: 0;
             padding: 0;
@@ -35,7 +34,6 @@
             flex-direction: column;
         }
 
-        /* Header Styles */
         .header {
             height: var(--header-height);
             background: var(--bg-secondary);
@@ -101,7 +99,6 @@
             background: var(--bg-primary);
         }
 
-        /* Main Content */
         .main-content {
             margin-top: var(--header-height);
             margin-bottom: var(--bottom-nav-height);
@@ -185,7 +182,6 @@
             background: rgba(217, 48, 37, 0.1);
         }
 
-        /* Bottom Navigation (Mobile) */
         .bottom-nav {
             display: none;
             position: fixed;
@@ -226,7 +222,6 @@
             font-size: 1.2rem;
         }
 
-        /* Add Playlist Modal */
         .modal {
             display: none;
             position: fixed;
@@ -311,7 +306,6 @@
             color: white;
         }
 
-        /* Floating Action Button (Mobile) */
         .fab {
             display: none;
             position: fixed;
@@ -333,7 +327,6 @@
             transform: scale(0.95);
         }
 
-        /* Toast Notification */
         .toast {
             position: fixed;
             bottom: calc(var(--bottom-nav-height) + 20px);
@@ -348,7 +341,6 @@
             display: none;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .header-actions {
                 display: none;
@@ -375,7 +367,6 @@
             }
         }
 
-        /* Desktop Specific */
         @media (min-width: 769px) {
             .main-content {
                 margin-bottom: 0;
@@ -400,7 +391,6 @@
             }
         }
 
-        /* PWA Installed App Styles */
         @media all and (display-mode: standalone) {
             .header {
                 -webkit-app-region: drag;
@@ -447,11 +437,11 @@
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="#favorites" class="nav-item">
+            <a href="favourites.html" class="nav-item">
                 <i class="fas fa-heart"></i>
                 <span>Favorites</span>
             </a>
-            <a href="#recent" class="nav-item">
+            <a href="recent.html" class="nav-item">
                 <i class="fas fa-history"></i>
                 <span>Recent</span>
             </a>
@@ -491,7 +481,6 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // Initialize playlists
         let playlists = JSON.parse(localStorage.getItem('playlists')) || [
             {
                 name: 'Default Playlist 1',
@@ -507,7 +496,6 @@
             }
         ];
 
-        // Render playlists
         function renderPlaylists() {
             const playlistGrid = document.getElementById('playlistGrid');
             playlistGrid.innerHTML = '';
@@ -549,7 +537,6 @@
             });
         }
 
-        // Modal functions
         function showAddPlaylistModal() {
             document.getElementById('addPlaylistModal').style.display = 'flex';
         }
@@ -560,7 +547,6 @@
             document.getElementById('playlistFile').value = '';
         }
 
-        // Add playlist
         function addPlaylist() {
             const urlInput = document.getElementById('playlistUrl');
             const fileInput = document.getElementById('playlistFile');
@@ -595,7 +581,6 @@
             }
         }
 
-        // Edit playlist
         function editPlaylist(index) {
             const playlist = playlists[index];
             const newName = prompt('Enter new playlist name:', playlist.name);
@@ -606,7 +591,6 @@
             }
         }
 
-        // Delete playlist
         function deletePlaylist(index) {
             if (confirm('Are you sure you want to delete this playlist?')) {
                 playlists.splice(index, 1);
@@ -615,13 +599,11 @@
             }
         }
 
-        // Open playlist
         function openPlaylist(index) {
             const playlist = playlists[index];
             location.href = `video.html?playlist=${encodeURIComponent(playlist.url)}&name=${encodeURIComponent(playlist.name)}`;
         }
 
-        // Toast notification
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -632,17 +614,14 @@
             }, 3000);
         }
 
-        // Save and render
         function saveAndRender() {
             localStorage.setItem('playlists', JSON.stringify(playlists));
             renderPlaylists();
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderPlaylists();
             
-            // Close modal when clicking outside
             document.getElementById('addPlaylistModal').addEventListener('click', (e) => {
                 if (e.target.id === 'addPlaylistModal') {
                     closeModal();
