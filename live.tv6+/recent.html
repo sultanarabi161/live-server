@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Recent - LiveTV Stream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --border-color: #dadce0;
+            --header-height: 60px;
+            --bottom-nav-height: 60px;
+            --content-padding: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #8ab4f8;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --bg-primary: #202124;
+            --bg-secondary: #292a2d;
+            --border-color: #3c4043;
+        }
+
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: var(--header-height);
+            background: var(--bg-secondary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 var(--content-padding);
+        }
+
+        .header-content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .app-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .clear-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .clear-button:hover {
+            background: var(--bg-primary);
+        }
+
+        .main-content {
+            margin-top: var(--header-height);
+            margin-bottom: var(--bottom-nav-height);
+            padding: var(--content-padding);
+            flex: 1;
+        }
+
+        .recent-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .channel-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .channel-content {
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .channel-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .channel-info {
+            flex: 1;
+        }
+
+        .channel-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .channel-category {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .watched-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .channel-actions {
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .action-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .play-btn {
+            color: var(--primary-color);
+            background: transparent;
+        }
+
+        .favorite-btn {
+            color: var(--text-secondary);
+            background: transparent;
+        }
+
+        .play-btn:hover {
+            background: rgba(26, 115, 232, 0.1);
+        }
+
+        .favorite-btn:hover {
+            background: var(--bg-primary);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--bottom-nav-height);
+            background: var(--bg-secondary);
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .bottom-nav-content {
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        .empty-text {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .empty-subtext {
+            font-size: 0.9rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: calc(var(--bottom-nav-height) + 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 2000;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .channel-logo {
+                width: 48px;
+                height: 48px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .main-content {
+                margin-bottom: 0;
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+
+            .channel-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            }
+        }
+
+        @media all and (display-mode: standalone) {
+            .header {
+                padding-top: env(safe-area-inset-top);
+            }
+
+            .bottom-nav {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/Htv0zYf/1000010471.png" alt="LiveTV Stream" class="app-logo">
+                <span class="app-title">Recent</span>
+            </div>
+            <button class="clear-button" onclick="clearHistory()">
+                <i class="fas fa-trash"></i>
+                Clear History
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="recent-list" id="recentList">
+            <!-- Recent channels will be added here -->
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="bottom-nav-content">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="favourites.html" class="nav-item">
+                <i class="fas fa-heart"></i>
+                <span>Favorites</span>
+            </a>
+            <a href="recent.html" class="nav-item active">
+                <i class="fas fa-history"></i>
+                <span>Recent</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Load theme
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+
+        // Initialize recent channels display
+        function loadRecentChannels() {
+            const recentList = document.getElementById('recentList');
+            const recentChannels = JSON.parse(localStorage.getItem('recentChannels') || '[]');
+
+            if (recentChannels.length === 0) {
+                recentList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-history empty-icon"></i>
+                        <div class="empty-text">No recent channels</div>
+                        <div class="empty-subtext">Your watch history will appear here</div>
+                    </div>
+                `;
+                return;
+            }
+
+            recentList.innerHTML = recentChannels.map((channel, index) => `
+                <div class="channel-card">
+                    <div class="channel-content" onclick="playChannel('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
+                        <img src="${channel.logo}" alt="${channel.name}" class="channel-logo"
+                             onerror="this.src='default-logo.png'">
+                        <div class="channel-info">
+                            <div class="channel-name">${channel.name}</div>
+                            <div class="channel-category">${channel.category}</div>
+                            <div class="watched-time">
+                                <i class="fas fa-clock"></i>
+                                <span>${getTimeAgo(channel.timestamp || Date.now())}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="channel-actions">
+                        <button class="action-button play-btn" onclick="playChannel('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                        <button class="action-button favorite-btn" onclick="toggleFavorite(${index})">
+                            <i class="fas ${isFavorite(channel.url) ? 'fa-heart' : 'fa-heart-o'}"></i>
+                            ${isFavorite(channel.url) ? 'Remove from Favorites' : 'Add to Favorites'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function playChannel(url, name) {
+            window.location.href = `video.html?url=${url}&name=${name}`;
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear your watch history?')) {
+                localStorage.setItem('recentChannels', '[]');
+                loadRecentChannels();
+                showToast('Watch history cleared');
+            }
+        }
+
+        function toggleFavorite(index) {
+            const recentChannels = JSON.parse(localStorage.getItem('recentChannels') || '[]');
+            const channel = recentChannels[index];
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            
+            const isFav = favorites.some(fav => fav.url === channel.url);
+            if (isFav) {
+                const newFavorites = favorites.filter(fav => fav.url !== channel.url);
+                localStorage.setItem('favorites', JSON.stringify(newFavorites));
+                showToast('Removed from favorites');
+            } else {
+                favorites.push({...channel, timestamp: Date.now()});
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+                showToast('Added to favorites');
+            }
+            
+            loadRecentChannels();
+        }
+
+        function isFavorite(url) {
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            return favorites.some(fav => fav.url === url);
+        }
+
+        function getTimeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+            
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `${interval} ${unit}${interval === 1 ? '' : 's'} ago`;
+                }
+            }
+
+            return 'Just now';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', loadRecentChannels);
+    </script>
+</body>
+</html>
