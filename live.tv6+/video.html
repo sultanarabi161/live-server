@@ -522,10 +522,95 @@
 
         // Initialize
         async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const playlistUrl = urlParams.get('playlist');
+            const playlistName = urlParams.get('name');
+
+            if (playlistUrl && playlistUrl !== '#') {
+                showLoading();
+                await parseM3U(playlistUrl);
+                document.title = `${playlistName} - Orbit Lite`;
+                hideLoading();
+            }
+
             setupEventListeners();
             setupTouchEvents();
             loadSettings();
             setupHeaderAutoHide();
+        }
+
+        // Parse M3U Playlist
+        async function parseM3U(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.text();
+                const lines = data.split('\n');
+                let channel = {};
+                
+                channels = [];
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.startsWith('#EXTINF:')) {
+                        const matches = line.match(/tvg-logo="([^"]*)" group-title="([^"]*)",(.+)/);
+                        if (matches) {
+                            channel = {
+                                logo: matches[1],
+                                category: matches[2],
+                                name: matches[3].trim()
+                            };
+                        }
+                    } else if (line.startsWith('http')) {
+                        channel.url = line;
+                        channels.push({...channel});
+                    }
+                }
+                
+                renderChannels();
+            } catch (error) {
+                console.error('Error parsing M3U:', error);
+                hideLoading();
+                showError('Failed to load playlist');
+            }
+        }
+
+        // Render Channels
+        function renderChannels() {
+            channelList.innerHTML = '';
+            channels.forEach((channel, index) => {
+                const channelElement = document.createElement('div');
+                channelElement.className = 'channel-item';
+                channelElement.innerHTML = `
+                    <img src="${channel.logo}" alt="${channel.name}" class="channel-logo" onerror="this.src='https://via.placeholder.com/40'">
+                    <div class="channel-info">
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-category">${channel.category}</div>
+                    </div>
+                `;
+                
+                channelElement.addEventListener('click', () => playChannel(index));
+                channelList.appendChild(channelElement);
+            });
+        }
+
+        // Play Channel
+        function playChannel(index) {
+            showLoading();
+            currentChannel = channels[index];
+            
+            // Update active channel in list
+            const items = channelList.getElementsByClassName('channel-item');
+            Array.from(items).forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+
+            // Set video source and play
+            videoPlayer.src = currentChannel.url;
+            videoPlayer.play().catch(error => {
+                console.error('Playback error:', error);
+                showError('Unable to play this channel');
+            });
         }
 
         // Setup header auto-hide
@@ -557,15 +642,6 @@
             videoContainer.addEventListener('touchstart', showHeader);
         }
 
-        // Load saved settings
-        function loadSettings() {
-            const savedVolume = localStorage.getItem('volume');
-            if (savedVolume !== null) {
-                videoPlayer.volume = parseFloat(savedVolume);
-                updateVolumeUI();
-            }
-        }
-
         // Setup event listeners
         function setupEventListeners() {
             // Video player events
@@ -574,6 +650,11 @@
             videoPlayer.addEventListener('timeupdate', updateProgress);
             videoPlayer.addEventListener('loadedmetadata', updateDuration);
             videoPlayer.addEventListener('volumechange', updateVolumeUI);
+            videoPlayer.addEventListener('loadstart', showLoading);
+            videoPlayer.addEventListener('playing', hideLoading);
+            videoPlayer.addEventListener('error', () => {
+                showError('Video playback error');
+            });
 
             // Control buttons
             playPauseBtn.addEventListener('click', togglePlay);
@@ -621,7 +702,6 @@
                 const deltaX = touchEndX - touchStartX;
                 const deltaY = touchEndY - touchStartY;
 
-                // Horizontal swipe for seeking
                 if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
                     if (deltaX > 0) {
                         skipTime(10);
@@ -766,6 +846,37 @@
             });
         }
 
+        // Loading and Error handling
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+            errorOverlay.style.display = 'none';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorOverlay.style.display = 'flex';
+            errorOverlay.querySelector('.error-message').textContent = message;
+            hideLoading();
+        }
+
+        function retryPlayback() {
+            if (currentChannel) {
+                playChannel(channels.indexOf(currentChannel));
+            }
+        }
+
+        // Load saved settings
+        function loadSettings() {
+            const savedVolume = localStorage.getItem('volume');
+            if (savedVolume !== null) {
+                videoPlayer.volume = parseFloat(savedVolume);
+                updateVolumeUI();
+            }
+        }
+
         // Utility functions
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
@@ -778,4 +889,3 @@
     </script>
 </body>
 </html>
-
