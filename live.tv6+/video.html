@@ -101,6 +101,7 @@
             flex: 1;
             display: flex;
             height: 100vh;
+            padding-top: var(--header-height);
         }
 
         .video-container {
@@ -218,16 +219,7 @@
             background: var(--bg-secondary);
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease-in-out;
-            position: fixed;
-            right: 0;
-            top: var(--header-height);
-            bottom: 0;
-            transform: translateX(100%);
-        }
-
-        .channel-container.show {
-            transform: translateX(0);
+            border-left: 1px solid var(--border-color);
         }
 
         .search-container {
@@ -361,27 +353,6 @@
             background: #ff6666;
         }
 
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            z-index: 1000;
-            animation: fadeInOut 3s ease-in-out;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, 20px); }
-            10% { opacity: 1; transform: translate(-50%, 0); }
-            90% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -20px); }
-        }
-
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -414,10 +385,6 @@
         }
 
         @media (min-width: 769px) {
-            .main-container {
-                padding-top: var(--header-height);
-            }
-
             .channel-container {
                 border-left: 1px solid var(--border-color);
             }
@@ -513,8 +480,7 @@
 
         <div class="channel-container" id="channelContainer">
             <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search channels..."
-                       id="searchInput">
+                <input type="text" class="search-input" placeholder="Search channels..." id="searchInput">
             </div>
             <div class="channel-list" id="channelList">
                 <!-- Channels will be added here -->
@@ -556,15 +522,6 @@
 
         // Initialize
         async function init() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const playlistUrl = urlParams.get('playlist');
-            const playlistName = urlParams.get('name');
-
-            if (playlistUrl && playlistUrl !== '#') {
-                await parseM3U(playlistUrl);
-                document.title = `${playlistName} - Orbit Lite`;
-            }
-
             setupEventListeners();
             setupTouchEvents();
             loadSettings();
@@ -600,124 +557,146 @@
             videoContainer.addEventListener('touchstart', showHeader);
         }
 
-        // Parse M3U playlist
-        async function parseM3U(url) {
-            try {
-                showLoading();
-                const response = await fetch(url);
-                const text = await response.text();
-                const lines = text.split('\n');
-                channels = [];
-                
-                for(let i = 0; i < lines.length; i++) {
-                    if(lines[i].startsWith('#EXTINF:')) {
-                        const infoLine = lines[i];
-                        const urlLine = lines[i + 1];
-                        
-                        const nameMatch = infoLine.match(/,(.+)$/);
-                        const logoMatch = infoLine.match(/tvg-logo="([^"]+)"/);
-                        const groupMatch = infoLine.match(/group-title="([^"]+)"/);
-                        
-                        if (urlLine && urlLine.trim()) {
-                            channels.push({
-                                name: nameMatch ? nameMatch[1].trim() : 'Unknown Channel',
-                                url: urlLine.trim(),
-                                logo: logoMatch ? logoMatch[1] : 'default-logo.png',
-                                category: groupMatch ? groupMatch[1] : 'Uncategorized'
-                            });
-                        }
-                    }
-                }
-                renderChannels();
-                hideLoading();
-            } catch(error) {
-                console.error('Error parsing M3U:', error);
-                showError();
-            }
-        }
-
-        // Channel list toggle
-        function toggleChannelList() {
-            channelContainer.classList.toggle('show');
-        }
-
-        // Quality settings
-        function toggleQualitySettings() {
-            const qualities = ['auto', 'high', 'medium', 'low'];
-            const currentQuality = localStorage.getItem('quality') || 'auto';
-            const newQuality = qualities[(qualities.indexOf(currentQuality) + 1) % qualities.length];
-            
-            localStorage.setItem('quality', newQuality);
-            showToast(`Quality set to: ${newQuality}`);
-            
-            if (currentChannel !== null) {
-                playChannel(currentChannel);
+        // Load saved settings
+        function loadSettings() {
+            const savedVolume = localStorage.getItem('volume');
+            if (savedVolume !== null) {
+                videoPlayer.volume = parseFloat(savedVolume);
+                updateVolumeUI();
             }
         }
 
         // Setup event listeners
         function setupEventListeners() {
-            videoPlayer.addEventListener('loadstart', showLoading);
-            videoPlayer.addEventListener('playing', hideLoading);
-            videoPlayer.addEventListener('error', showError);
+            // Video player events
+            videoPlayer.addEventListener('play', updatePlayPauseUI);
+            videoPlayer.addEventListener('pause', updatePlayPauseUI);
             videoPlayer.addEventListener('timeupdate', updateProgress);
-            videoPlayer.addEventListener('durationchange', updateDuration);
+            videoPlayer.addEventListener('loadedmetadata', updateDuration);
+            videoPlayer.addEventListener('volumechange', updateVolumeUI);
 
-            playPauseBtn.onclick = togglePlay;
-            videoPlayer.onclick = togglePlay;
-            muteBtn.onclick = toggleMute;
-            volumeSlider.onclick = changeVolume;
-            progressBar.onclick = seek;
-            fullscreenBtn.onclick = toggleFullscreen;
-            pipBtn.onclick = togglePiP;
-            rewindBtn.onclick = () => skipTime(-10);
-            forwardBtn.onclick = () => skipTime(10);
+            // Control buttons
+            playPauseBtn.addEventListener('click', togglePlay);
+            muteBtn.addEventListener('click', toggleMute);
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            pipBtn.addEventListener('click', togglePiP);
+            rewindBtn.addEventListener('click', () => skipTime(-10));
+            forwardBtn.addEventListener('click', () => skipTime(10));
 
-            qualityBtn.onclick = toggleQualitySettings;
-            channelListBtn.onclick = toggleChannelList;
-            searchInput.oninput = renderChannels;
+            // Volume control
+            volumeSlider.addEventListener('click', changeVolume);
+            volumeSlider.addEventListener('mousedown', startVolumeChange);
 
-            videoPlayer.onvolumechange = () => {
-                localStorage.setItem('volume', videoPlayer.volume);
-                updateVolumeUI();
-            };
+            // Progress bar
+            progressBar.addEventListener('click', seek);
+            progressBar.addEventListener('mousedown', startSeek);
+
+            // Channel list toggle
+            channelListBtn.addEventListener('click', toggleChannelList);
+
+            // Search
+            searchInput.addEventListener('input', filterChannels);
+        }
+
+        // Setup touch events
+        function setupTouchEvents() {
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            videoContainer.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                isTouch = true;
+            });
+
+            videoContainer.addEventListener('touchend', () => {
+                isTouch = false;
+            });
+
+            videoContainer.addEventListener('touchmove', (e) => {
+                if (!isTouch) return;
+
+                const touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
+
+                // Horizontal swipe for seeking
+                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                    if (deltaX > 0) {
+                        skipTime(10);
+                    } else {
+                        skipTime(-10);
+                    }
+                    touchStartX = touchEndX;
+                }
+            });
         }
 
         // Playback controls
         function togglePlay() {
             if (videoPlayer.paused) {
                 videoPlayer.play();
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
             } else {
                 videoPlayer.pause();
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             }
         }
 
+        function updatePlayPauseUI() {
+            playPauseBtn.innerHTML = videoPlayer.paused ? 
+                '<i class="fas fa-play"></i>' : 
+                '<i class="fas fa-pause"></i>';
+        }
+
+        function skipTime(seconds) {
+            videoPlayer.currentTime += seconds;
+        }
+
+        // Volume controls
         function toggleMute() {
             videoPlayer.muted = !videoPlayer.muted;
-            updateVolumeUI();
+        }
+
+        function updateVolumeUI() {
+            const volumeIcon = muteBtn.querySelector('i');
+            const volume = videoPlayer.volume;
+            const isMuted = videoPlayer.muted;
+
+            volumeLevel.style.width = `${isMuted ? 0 : volume * 100}%`;
+            
+            if (isMuted || volume === 0) {
+                volumeIcon.className = 'fas fa-volume-mute';
+            } else if (volume < 0.5) {
+                volumeIcon.className = 'fas fa-volume-down';
+            } else {
+                volumeIcon.className = 'fas fa-volume-up';
+            }
+
+            localStorage.setItem('volume', volume);
         }
 
         function changeVolume(e) {
             const rect = volumeSlider.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            videoPlayer.volume = Math.max(0, Math.min(1, pos));
-            updateVolumeUI();
+            const volume = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            videoPlayer.volume = volume;
+            videoPlayer.muted = false;
         }
 
-        function updateVolumeUI() {
-            volumeLevel.style.width = (videoPlayer.volume * 100) + '%';
-            muteBtn.innerHTML = videoPlayer.muted || videoPlayer.volume === 0 ? 
-                '<i class="fas fa-volume-mute"></i>' : 
-                '<i class="fas fa-volume-up"></i>';
+        function startVolumeChange(e) {
+            function onMouseMove(e) {
+                changeVolume(e);
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
         }
 
-        function skipTime(seconds) {
-            videoPlayer.currentTime = Math.max(0, 
-                Math.min(videoPlayer.duration, videoPlayer.currentTime + seconds));
-        }
-
+        // Progress bar
         function updateProgress() {
             const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
             progressFilled.style.width = `${progress}%`;
@@ -734,6 +713,32 @@
             videoPlayer.currentTime = pos * videoPlayer.duration;
         }
 
+        function startSeek(e) {
+            function onMouseMove(e) {
+                seek(e);
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        // Fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
+        // Picture in Picture
         async function togglePiP() {
             try {
                 if (document.pictureInPictureElement) {
@@ -746,81 +751,19 @@
             }
         }
 
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                videoContainer.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
+        // Channel list
+        function toggleChannelList() {
+            channelContainer.classList.toggle('hidden');
         }
 
-        // Channel management
-        function renderChannels() {
-            channelList.innerHTML = '';
+        function filterChannels() {
             const searchTerm = searchInput.value.toLowerCase();
+            const items = channelList.getElementsByClassName('channel-item');
             
-            const filteredChannels = channels.filter(channel => 
-                channel.name.toLowerCase().includes(searchTerm) ||
-                channel.category.toLowerCase().includes(searchTerm)
-            );
-
-            filteredChannels.forEach((channel, index) => {
-                const channelEl = document.createElement('div');
-                channelEl.className = `channel-item ${currentChannel === index ? 'active' : ''}`;
-                channelEl.innerHTML = `
-                    <img src="${channel.logo}" alt="${channel.name}" class="channel-logo"
-                         onerror="this.src='default-logo.png'">
-                    <div class="channel-info">
-                        <div class="channel-name">${channel.name}</div>
-                        <div class="channel-category">${channel.category}</div>
-                    </div>
-                `;
-                channelEl.onclick = () => playChannel(index);
-                channelList.appendChild(channelEl);
+            Array.from(items).forEach(item => {
+                const channelName = item.querySelector('.channel-name').textContent.toLowerCase();
+                item.style.display = channelName.includes(searchTerm) ? '' : 'none';
             });
-        }
-
-        async function playChannel(index) {
-            currentChannel = index;
-            const channel = channels[index];
-            
-            showLoading();
-            try {
-                videoPlayer.src = channel.url;
-                await videoPlayer.play();
-                hideLoading();
-                renderChannels();
-                saveToRecent(channel);
-            } catch(error) {
-                console.error('Playback error:', error);
-                showError();
-            }
-        }
-
-        // UI State management
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-            errorOverlay.style.display = 'none';
-        }
-
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
-
-        function showError() {
-            loadingOverlay.style.display = 'none';
-            errorOverlay.style.display = 'flex';
-        }
-
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
         }
 
         // Utility functions
@@ -830,33 +773,9 @@
             return `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        function setupTouchEvents() {
-            document.addEventListener('touchstart', () => {
-                isTouch = true;
-            });
-        }
-
-        // Storage functions
-        function saveToRecent(channel) {
-            let recent = JSON.parse(localStorage.getItem('recentChannels') || '[]');
-            recent = recent.filter(ch => ch.url !== channel.url);
-            recent.unshift(channel);
-            if (recent.length > 10) recent.pop();
-            localStorage.setItem('recentChannels', JSON.stringify(recent));
-        }
-
-        function loadSettings() {
-            const volume = localStorage.getItem('volume');
-            if (volume !== null) {
-                videoPlayer.volume = parseFloat(volume);
-                updateVolumeUI();
-            }
-        }
-
-        // Initialize app
+        // Initialize the player
         init();
     </script>
 </body>
 </html>
-
 
