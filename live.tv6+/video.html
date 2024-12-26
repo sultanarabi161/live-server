@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Video Player - Orbit Lite</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --border-color: #dadce0;
+            --header-height: 60px;
+            --channel-list-width: 300px;
+            --video-controls-height: 48px;
+        }
+
+        body {
+            background: #000;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            height: var(--header-height);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .app-title {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .icon-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            height: 100vh;
+            padding-top: var(--header-height);
+        }
+
+        .video-container {
+            flex: 1;
+            background: #000;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            padding: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .video-container:hover .video-controls,
+        .video-controls.active {
+            opacity: 1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .progress-filled {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 2px;
+            width: 0;
+            position: absolute;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .controls-left, .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .control-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1rem;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .volume-level {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            width: 100%;
+            position: absolute;
+        }
+
+        .time-display {
+            font-size: 0.9rem;
+            color: white;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .channel-container {
+            width: var(--channel-list-width);
+            background: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-color);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .channel-container.hidden {
+            transform: translateX(100%);
+        }
+
+        .search-container {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .channel-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            gap: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .channel-item:hover {
+            background: var(--bg-primary);
+        }
+
+        .channel-item.active {
+            background: rgba(26, 115, 232, 0.1);
+        }
+
+        .channel-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .channel-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .channel-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .channel-category {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .channel-language {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #ff4444;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .retry-button {
+            padding: 12px 24px;
+            background: #ff4444;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .retry-button:hover {
+            background: #ff6666;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .video-container {
+                height: 56.25vw;
+            }
+
+            .channel-container {
+                width: 100%;
+                height: calc(100vh - 56.25vw - var(--header-height));
+            }
+
+            .channel-container.hidden {
+                transform: translateY(100%);
+            }
+
+            .video-controls {
+                padding: 12px;
+            }
+
+            .volume-container {
+                display: none;
+            }
+
+            .time-display {
+                display: none;
+            }
+
+            .control-button span {
+                display: none;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .channel-container {
+                border-left: 1px solid var(--border-color);
+            }
+
+            .video-container:fullscreen {
+                padding: 0;
+            }
+
+            .video-container:fullscreen .video-controls {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header" id="header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/Htv0zYf/1000010471.png" alt="Orbit Lite" class="app-logo">
+            <a href="index.html" class="app-title">Orbit Lite</a>
+        </div>
+        <div class="header-actions">
+            <button class="icon-button" id="qualityBtn" title="Quality Settings">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button class="icon-button" id="channelListBtn" title="Toggle Channel List">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="video-container" id="videoContainer">
+            <video id="videoPlayer" class="video-player" playsinline>
+                Your browser does not support the video element.
+            </video>
+
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <span>Loading...</span>
+            </div>
+
+            <div class="error-overlay" id="errorOverlay">
+                <i class="fas fa-exclamation-circle error-icon"></i>
+                <div class="error-message">Unable to play this channel</div>
+                <button class="retry-button" onclick="retryPlayback()">
+                    <i class="fas fa-redo"></i>
+                    <span>Retry</span>
+                </button>
+            </div>
+
+            <div class="video-controls" id="videoControls">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-filled" id="progressFilled"></div>
+                </div>
+                <div class="controls-row">
+                    <div class="controls-left">
+                        <button class="control-button" id="playPauseBtn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="control-button" id="rewindBtn">
+                            <i class="fas fa-backward"></i>
+                            <span>10s</span>
+                        </button>
+                        <button class="control-button" id="forwardBtn">
+                            <i class="fas fa-forward"></i>
+                            <span>10s</span>
+                        </button>
+                        <div class="volume-container">
+                            <button class="control-button" id="muteBtn">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                            <div class="volume-slider" id="volumeSlider">
+                                <div class="volume-level" id="volumeLevel"></div>
+                            </div>
+                        </div>
+                        <div class="time-display">
+                            <span id="currentTime">0:00</span> / 
+                            <span id="duration">0:00</span>
+                        </div>
+                    </div>
+                    <div class="controls-right">
+                        <button class="control-button" id="pipBtn" title="Picture in Picture">
+                            <i class="fas fa-clone"></i>
+                        </button>
+                        <button class="control-button" id="fullscreenBtn" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="channel-container" id="channelContainer">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search channels..." id="searchInput">
+            </div>
+            <div class="channel-list" id="channelList">
+                <!-- Channels will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoContainer = document.getElementById('videoContainer');
+        const videoControls = document.getElementById('videoControls');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeLevel = document.getElementById('volumeLevel');
+        const progressBar = document.getElementById('progressBar');
+        const progressFilled = document.getElementById('progressFilled');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const pipBtn = document.getElementById('pipBtn');
+        const header = document.getElementById('header');
+        const channelList = document.getElementById('channelList');
+        const searchInput = document.getElementById('searchInput');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorOverlay = document.getElementById('errorOverlay');
+        const channelContainer = document.getElementById('channelContainer');
+        const channelListBtn = document.getElementById('channelListBtn');
+        const rewindBtn = document.getElementById('rewindBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+
+        let channels = [];
+        let currentChannel = null;
+        let controlsTimeout;
+        let headerTimeout;
+        let isTouch = false;
+
+        // Initialize
+        async function init() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const playlistUrl = urlParams.get('playlist');
+                const playlistName = urlParams.get('name');
+
+                if (playlistUrl && playlistUrl !== '#') {
+                    showLoading();
+                    await parseM3U(playlistUrl);
+                    if (playlistName) {
+                        document.title = `${playlistName} - Orbit Lite`;
+                    }
+                    hideLoading();
+                }
+
+                setupEventListeners();
+                setupTouchEvents();
+                loadSettings();
+                setupHeaderAutoHide();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError('Failed to initialize player');
+            }
+        }
+
+        // Parse M3U Playlist
+        async function parseM3U(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.text();
+                const lines = data.split('\n');
+                let channel = {};
+                
+                channels = [];
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.startsWith('#EXTINF:')) {
+                        // Initialize default channel object
+                        channel = {};
+
+                        // Extract all possible metadata
+                        const logoMatch = line.match(/tvg-logo="([^"]*)"/) || line.match(/logo="([^"]*)"/);
+                        const groupMatch = line.match(/group-title="([^"]*)"/) || line.match(/group="([^"]*)"/);
+                        const nameMatch = line.match(/tvg-name="([^"]*)"/) || line.match(/name="([^"]*)"/);
+                        const languageMatch = line.match(/tvg-language="([^"]*)"/);
+                        const idMatch = line.match(/tvg-id="([^"]*)"/);
+
+                        // Set channel properties
+                        if (logoMatch) channel.logo = logoMatch[1];
+                        if (groupMatch) channel.category = groupMatch[1];
+                        if (nameMatch) channel.name = nameMatch[1];
+                        if (languageMatch) channel.language = languageMatch[1];
+                        if (idMatch) channel.tvgId = idMatch[1];
+
+                        // Extract channel name from comma format if not already set
+                        if (!channel.name && line.includes(',')) {
+                            channel.name = line.split(',').pop().trim();
+                        }
+
+                        // Set defaults if not found
+                        channel.logo = channel.logo || '';
+                        channel.category = channel.category || 'Uncategorized';
+                        channel.name = channel.name || 'Unknown Channel';
+                        
+                    } else if (line.startsWith('http')) {
+                        channel.url = line.trim();
+                        if (channel.url) {
+                            channels.push({...channel});
+                        }
+                    }
+                }
+                
+                renderChannels();
+            } catch (error) {
+                console.error('Error parsing M3U:', error);
+                showError('Failed to load playlist');
+            }
+        }
+
+        // Render Channels
+        function renderChannels() {
+            channelList.innerHTML = '';
+            channels.forEach((channel, index) => {
+                const channelElement = document.createElement('div');
+                channelElement.className = 'channel-item';
+                
+                let channelHTML = `
+                    <img src="${channel.logo || 'https://via.placeholder.com/40'}" 
+                         alt="${channel.name}" 
+                         class="channel-logo" 
+                         onerror="this.src='https://via.placeholder.com/40'">
+                    <div class="channel-info">
+                        <div class="channel-name">${channel.name}</div>
+                `;
+
+                if (channel.category && channel.category !== 'Uncategorized') {
+                    channelHTML += `<div class="channel-category">${channel.category}</div>`;
+                }
+
+                if (channel.language) {
+                    channelHTML += `<div class="channel-language">${channel.language}</div>`;
+                }
+
+                channelHTML += `</div>`;
+                
+                channelElement.innerHTML = channelHTML;
+                channelElement.addEventListener('click', () => playChannel(index));
+                channelList.appendChild(channelElement);
+            });
+        }
+
+        // Play Channel
+        function playChannel(index) {
+            showLoading();
+            currentChannel = channels[index];
+            
+            // Update active channel in list
+            const items = channelList.getElementsByClassName('channel-item');
+            Array.from(items).forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+
+            // Set video source and play
+            videoPlayer.src = currentChannel.url;
+            videoPlayer.play().catch(error => {
+                console.error('Playback error:', error);
+                showError('Unable to play this channel');
+            });
+
+            // Update document title
+            document.title = `${currentChannel.name} - Orbit Lite`;
+        }
+
+        // Setup header auto-hide
+        function setupHeaderAutoHide() {
+            let lastScrollY = window.scrollY;
+
+            function hideHeader() {
+                if (!videoPlayer.paused) {
+                    header.classList.add('hidden');
+                }
+            }
+
+            function showHeader() {
+                header.classList.remove('hidden');
+                clearTimeout(headerTimeout);
+                if (!videoPlayer.paused) {
+                    headerTimeout = setTimeout(hideHeader, 3000);
+                }
+            }
+
+            videoContainer.addEventListener('mousemove', showHeader);
+            videoContainer.addEventListener('touchstart', showHeader);
+            videoPlayer.addEventListener('play', () => {
+                headerTimeout = setTimeout(hideHeader, 3000);
+            });
+            videoPlayer.addEventListener('pause', showHeader);
+        }
+
+        // Filter Channels
+        function filterChannels() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const items = channelList.getElementsByClassName('channel-item');
+            
+            Array.from(items).forEach((item, index) => {
+                const channel = channels[index];
+                const matchName = channel.name.toLowerCase().includes(searchTerm);
+                const matchCategory = channel.category.toLowerCase().includes(searchTerm);
+                const matchLanguage = channel.language && channel.language.toLowerCase().includes(searchTerm);
+                
+                item.style.display = (matchName || matchCategory || matchLanguage) ? '' : 'none';
+            });
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Video player events
+            videoPlayer.addEventListener('play', updatePlayPauseUI);
+            videoPlayer.addEventListener('pause', updatePlayPauseUI);
+            videoPlayer.addEventListener('timeupdate', updateProgress);
+            videoPlayer.addEventListener('loadedmetadata', updateDuration);
+            videoPlayer.addEventListener('volumechange', updateVolumeUI);
+            videoPlayer.addEventListener('loadstart', showLoading);
+            videoPlayer.addEventListener('playing', hideLoading);
+            videoPlayer.addEventListener('error', () => showError('Video playback error'));
+
+            // Control buttons
+            playPauseBtn.addEventListener('click', togglePlay);
+            muteBtn.addEventListener('click', toggleMute);
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            pipBtn.addEventListener('click', togglePiP);
+            rewindBtn.addEventListener('click', () => skipTime(-10));
+            forwardBtn.addEventListener('click', () => skipTime(10));
+            channelListBtn.addEventListener('click', toggleChannelList);
+            searchInput.addEventListener('input', filterChannels);
+
+            // Volume and progress controls
+            volumeSlider.addEventListener('click', changeVolume);
+            progressBar.addEventListener('click', seek);
+        }
+
+        // Touch Events Setup
+        function setupTouchEvents() {
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            videoContainer.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                isTouch = true;
+            });
+
+            videoContainer.addEventListener('touchend', () => {
+                isTouch = false;
+            });
+
+            videoContainer.addEventListener('touchmove', (e) => {
+                if (!isTouch) return;
+
+                const touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
+
+                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                    if (deltaX > 0) {
+                        skipTime(10);
+                    } else {
+                        skipTime(-10);
+                    }
+                    touchStartX = touchEndX;
+                }
+            });
+        }
+
+        // Playback Controls
+        function togglePlay() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+            } else {
+                videoPlayer.pause();
+            }
+        }
+
+        function updatePlayPauseUI() {
+            playPauseBtn.innerHTML = videoPlayer.paused ? 
+                '<i class="fas fa-play"></i>' : 
+                '<i class="fas fa-pause"></i>';
+        }
+
+        function skipTime(seconds) {
+            videoPlayer.currentTime += seconds;
+        }
+
+        // Volume Controls
+        function toggleMute() {
+            videoPlayer.muted = !videoPlayer.muted;
+        }
+
+        function updateVolumeUI() {
+            const volumeIcon = muteBtn.querySelector('i');
+            const volume = videoPlayer.volume;
+            const isMuted = videoPlayer.muted;
+
+            volumeLevel.style.width = `${isMuted ? 0 : volume * 100}%`;
+            
+            if (isMuted || volume === 0) {
+                volumeIcon.className = 'fas fa-volume-mute';
+            } else if (volume < 0.5) {
+                volumeIcon.className = 'fas fa-volume-down';
+            } else {
+                volumeIcon.className = 'fas fa-volume-up';
+            }
+
+            localStorage.setItem('volume', volume);
+        }
+
+        function changeVolume(e) {
+            const rect = volumeSlider.getBoundingClientRect();
+            const volume = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            videoPlayer.volume = volume;
+            videoPlayer.muted = false;
+        }
+
+        // Progress Bar
+        function updateProgress() {
+            if (videoPlayer.duration) {
+                const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+                progressFilled.style.width = `${progress}%`;
+                currentTimeEl.textContent = formatTime(videoPlayer.currentTime);
+            }
+        }
+
+        function updateDuration() {
+            durationEl.textContent = formatTime(videoPlayer.duration);
+        }
+
+        function seek(e) {
+            const rect = progressBar.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            videoPlayer.currentTime = pos * videoPlayer.duration;
+        }
+
+        // Fullscreen Controls
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
+        // Picture in Picture
+        async function togglePiP() {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    await videoPlayer.requestPictureInPicture();
+                }
+            } catch (error) {
+                console.error('PiP error:', error);
+            }
+        }
+
+        // Channel List Toggle
+        function toggleChannelList() {
+            channelContainer.classList.toggle('hidden');
+        }
+
+        // Loading and Error Handling
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+            errorOverlay.style.display = 'none';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorOverlay.style.display = 'flex';
+            errorOverlay.querySelector('.error-message').textContent = message;
+            hideLoading();
+        }
+
+        function retryPlayback() {
+            if (currentChannel) {
+                playChannel(channels.indexOf(currentChannel));
+            }
+        }
+
+        // Settings
+        function loadSettings() {
+            const savedVolume = localStorage.getItem('volume');
+            if (savedVolume !== null) {
+                videoPlayer.volume = parseFloat(savedVolume);
+                updateVolumeUI();
+            }
+        }
+
+        // Utility Functions
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            seconds = Math.floor(seconds % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Initialize the player
+        init();
+    </script>
+</body>
+</html>
+
