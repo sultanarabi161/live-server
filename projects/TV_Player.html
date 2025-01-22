@@ -214,7 +214,7 @@
 
   async function loadChannels() {
     try {
-      const response = await fetch('https://bookmarks-web.netlify.app/live/playlists/demo.m3u');
+      const response = await fetch('https://m3u.ch/pl/b3502e67604df4eb6e19c6a7e7d03e22_2c4afb9d467d57c9d539a0d729a1d3d0.m3u');
       const playlist = await response.text();
       const lines = playlist.split('\n');
       const channels = [];
