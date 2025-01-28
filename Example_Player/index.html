@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS.js Player Example</title>
+</head>
+<body>
+    <h1>HLS.js Player Example</h1>
+    <video id="video" width="640" height="360" controls autoplay></video>
+
+    <!-- Include hls.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <script>
+        const video = document.getElementById('video');
+        const videoSrc = 'http://125.209.88.166:45793/BRN/ArySports.stream/playlist.m3u8';
+
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Fallback for Safari
+            video.src = videoSrc;
+            video.addEventListener('loadedmetadata', function() {
+                video.play();
+            });
+        } else {
+            console.error('HLS not supported in this browser.');
+        }
+    </script>
+</body>
+</html>
